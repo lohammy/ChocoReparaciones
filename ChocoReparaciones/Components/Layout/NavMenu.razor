@@ -1,86 +1,58 @@
 ﻿@implements IDisposable
-
 @inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.Components.Authorization
 
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">ChocoReparaciones</a>
+<div class="nav-topbar shadow-sm px-4 py-2 d-flex align-items-center justify-content-between">
+
+    <div class="d-flex align-items-center text-white fw-semibold">
+        <i class="bi bi-person-circle me-2"></i>
+        @contextUser
     </div>
-</div>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+    <div class="nav-pill-container d-flex align-items-center gap-3">
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
+        <NavLink class="nav-pill" href="/admin/dashboard">
+            <i class="bi bi-speedometer2 me-2"></i> Dashboard
+        </NavLink>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
+        <NavLink class="nav-pill" href="/admin/ordenes">
+            <i class="bi bi-tools me-2"></i> Órdenes
+        </NavLink>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
+        <NavLink class="nav-pill" href="/admin/pedidos">
+            <i class="bi bi-truck me-2"></i> Pedidos
+        </NavLink>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="auth">
-                <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Auth Required
-            </NavLink>
-        </div>
+        <NavLink class="nav-pill" href="/admin/productos/crear">
+            <i class="bi bi-plus-circle-dotted me-2"></i> Nuevo Producto
+        </NavLink>
 
-        <AuthorizeView>
-            <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Manage">
-                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
-                    </NavLink>
-                </div>
-                <div class="nav-item px-3">
-                    <form action="Account/Logout" method="post">
-                        <AntiforgeryToken />
-                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                        <button type="submit" class="nav-link">
-                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
-                        </button>
-                    </form>
-                </div>
-            </Authorized>
-            <NotAuthorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Register">
-                        <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
-                    </NavLink>
-                </div>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Login">
-                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
-                    </NavLink>
-                </div>
-            </NotAuthorized>
-        </AuthorizeView>
-    </nav>
+        <NavLink class="nav-pill" href="/admin/ajustar-stock">
+            <i class="bi bi-boxes me-2"></i> Inventario
+        </NavLink>
+
+        <NavLink class="nav-pill" href="/admin/usuarios">
+            <i class="bi bi-people-fill me-2"></i> Usuarios
+        </NavLink>
+
+        <NavLink class="nav-pill" href="/admin/registrar-empleado">
+            <i class="bi bi-person-plus me-2"></i> Nuevo Usuario
+        </NavLink>
+
+    </div>
+
 </div>
 
 @code {
-    private string? currentUrl;
+    string contextUser = "";
 
     protected override void OnInitialized()
     {
-        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
         NavigationManager.LocationChanged += OnLocationChanged;
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
-        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
         StateHasChanged();
     }
 
@@ -89,4 +61,3 @@
         NavigationManager.LocationChanged -= OnLocationChanged;
     }
 }
-
