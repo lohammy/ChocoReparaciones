@@ -4,8 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChocoReparaciones.Data;
 
-    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options)
-    {
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options)
+{
 	public DbSet<Cliente> Clientes { get; set; }
 	public DbSet<Producto> Productos { get; set; }
 	public DbSet<Reparacion> Reparaciones { get; set; }
