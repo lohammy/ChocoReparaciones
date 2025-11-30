@@ -20,7 +20,7 @@ namespace ChocoReparaciones.Models
 
 		[Required(ErrorMessage = "El número de teléfono es obligatorio.")]
 		[Phone(ErrorMessage = "El número de teléfono no es válido.")]
-		[Range(1, double.MaxValue, ErrorMessage = "Debe introducir un monto valido")]
+		[Range(1, double.MaxValue, ErrorMessage = "Debe introducir un numero valido")]
 		public string Telefono { get; set; } = "";
 
 		[Required]
