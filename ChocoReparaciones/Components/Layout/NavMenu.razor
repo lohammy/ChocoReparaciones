@@ -3,44 +3,27 @@
 @using Microsoft.AspNetCore.Components.Authorization
 
 <div class="nav-topbar shadow-sm px-4 py-2 d-flex align-items-center justify-content-between">
-
     <div class="d-flex align-items-center text-white fw-semibold">
         <i class="bi bi-person-circle me-2"></i>
         @contextUser
     </div>
+    <ul class="nav-link">
+        <li><a href="/" class="@GetActive("/", true)">Home</a></li>
+        <li><a href="/ChocoReparaciones/Dashboard" class="@GetActive("/ChocoReparaciones/Dashboard")">Dashboard</a></li>
+        <li><a href="/ChocoReparaciones/Ordenes" class="@GetActive("/ChocoReparaciones/Reparacion")">Reparación</a></li>
 
-    <div class="nav-pill-container d-flex align-items-center gap-3">
-
-        <NavLink class="nav-pill" href="/admin/dashboard">
-            <i class="bi bi-speedometer2 me-2"></i> Dashboard
-        </NavLink>
-
-        <NavLink class="nav-pill" href="/admin/ordenes">
-            <i class="bi bi-tools me-2"></i> Órdenes
-        </NavLink>
-
-        <NavLink class="nav-pill" href="/admin/pedidos">
-            <i class="bi bi-truck me-2"></i> Pedidos
-        </NavLink>
-
-        <NavLink class="nav-pill" href="/admin/productos/crear">
-            <i class="bi bi-plus-circle-dotted me-2"></i> Nuevo Producto
-        </NavLink>
-
-        <NavLink class="nav-pill" href="/admin/ajustar-stock">
-            <i class="bi bi-boxes me-2"></i> Inventario
-        </NavLink>
-
-        <NavLink class="nav-pill" href="/admin/usuarios">
-            <i class="bi bi-people-fill me-2"></i> Usuarios
-        </NavLink>
-
-        <NavLink class="nav-pill" href="/admin/registrar-empleado">
-            <i class="bi bi-person-plus me-2"></i> Nuevo Usuario
-        </NavLink>
-
-    </div>
-
+        <AuthorizeView Roles="Admin">
+            <Authorized>
+                <li><a href="/ChocoReparaciones/NuevoProducto/crear" class="@GetActive("/ChocoReparaciones/NuevoProducto")">Nuevo Producto</a></li>
+            </Authorized>
+        </AuthorizeView>
+        <AuthorizeView Roles="Admin, Tecnico">
+            <Authorized>
+                <li><a href="/ChocoReparaciones/Inventario" class="@GetActive("/ChocoReparaciones/Inventario")">Inventario</a></li>
+            </Authorized>
+        </AuthorizeView>
+        <li><a href="/Account/Login" class="@GetActive("/Account/Login")">Iniciar sesión</a></li>
+    </ul>
 </div>
 
 @code {
@@ -54,6 +37,21 @@
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
         StateHasChanged();
+    }
+
+    private string GetActive(string url, bool isHome = false)
+    {
+        var currentUrl = NavigationManager.Uri;
+        var uri = new Uri(currentUrl);
+        var path = uri.AbsolutePath;
+        if (isHome)
+        {
+            return (path == "/" || path == "/Home") ? "active" : "";
+        }
+        else
+        {
+            return path.StartsWith(url, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+        }
     }
 
     public void Dispose()
