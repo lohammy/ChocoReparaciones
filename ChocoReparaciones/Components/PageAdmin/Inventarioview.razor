@@ -1,0 +1,185 @@
+﻿@page "/ChocoReparaciones/InventarioView"
+@attribute [Authorize(Roles = "Admin,Tecnico")]
+@using ChocoReparaciones.Models
+@using ChocoReparaciones.Services
+@using Microsoft.AspNetCore.Authorization
+@inject ProductoServices ProductoServices
+@inject NavigationManager NavigationManager
+
+@rendermode InteractiveServer
+
+<PageTitle>Inventario - Vista de Productos</PageTitle>
+
+<div class="dashboard-container">
+    <div class="sidebar">
+        <div class="sidebar-footer">
+            <div class="logo-container">
+                <i class="bi bi-tools"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="content-header">
+            <h2 class="header-title">Inventario de Repuestos</h2>
+        </div>
+
+        <div class="products-wrapper">
+            @if (productos == null)
+            {
+                <div class="loading-state">
+                    <div class="spinner-large"></div>
+                    <p>Cargando productos...</p>
+                </div>
+            }
+            else if (!productos.Any())
+            {
+                <div class="empty-state">
+                    <i class="bi bi-box"></i>
+                    <h5>No hay productos disponibles</h5>
+                    <p>Registra productos nuevos para verlos aquí.</p>
+                    <button class="btn-primary" @onclick="IrANuevoProducto">
+                        <i class="bi bi-plus-circle"></i>
+                        Agregar Producto
+                    </button>
+                </div>
+            }
+            else
+            {
+                <div class="products-grid">
+                    @foreach (var producto in productos)
+                    {
+                        <div class="product-card">
+                            <div class="product-header">
+                                <h6 class="product-title">@producto.Nombre</h6>
+                            </div>
+
+                            <div class="product-details">
+                                <div class="product-info">
+                                    <span class="info-label">Stock:</span>
+                                    <span class="info-value">@producto.CantidadDisponible unidades</span>
+                                </div>
+
+                                <div class="product-info">
+                                    <span class="info-label">Código:</span>
+                                    <span class="info-value">@GenerarCodigo(producto)</span>
+                                </div>
+
+                                <div class="product-info">
+                                    <span class="info-label">Precio:</span>
+                                    <span class="info-value">RD$ @producto.Precio.ToString("N2")</span>
+                                </div>
+                            </div>
+
+                            <div class="product-actions">
+                                @if (producto.CantidadDisponible > 0)
+                                {
+                                    <button class="btn-use" @onclick="() => UsarEnReparacion(producto)">
+                                        Usar en reparación
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn-request" @onclick="() => SolicitarProducto(producto)">
+                                        Solicitar
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="navigation-buttons">
+                    <button class="btn-secondary" @onclick="VolverABusqueda">
+                        <i class="bi bi-arrow-left"></i>
+                        <span>Volver a Búsqueda</span>
+                    </button>
+                    <button class="btn-primary" @onclick="IrANuevoProducto">
+                        <i class="bi bi-plus-circle"></i>
+                        <span>Agregar Producto</span>
+                    </button>
+                </div>
+            }
+        </div>
+
+        @if (!string.IsNullOrEmpty(mensaje))
+        {
+            <div class="alert @claseAlerta">
+                @mensaje
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private List<Producto>? productos;
+    private string mensaje = "";
+    private string claseAlerta = "alert-info";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarProductos();
+    }
+
+    private async Task CargarProductos()
+    {
+        productos = await ProductoServices.ListarProductos();
+        StateHasChanged();
+    }
+
+    private string GenerarCodigo(Producto producto)
+    {
+        var prefijo = producto.Categoria?.Substring(0, Math.Min(3, producto.Categoria.Length)).ToUpper() ?? "PRD";
+        var sufijo = producto.Id.ToString("D3");
+        return $"{prefijo}-{sufijo}";
+    }
+
+    private async Task UsarEnReparacion(Producto producto)
+    {
+        if (producto.CantidadDisponible > 0)
+        {
+            producto.CantidadDisponible--;
+            await ProductoServices.Guardar(producto);
+
+            mensaje = $"'{producto.Nombre}' usado en reparación. Stock actualizado.";
+            claseAlerta = "alert-success";
+        }
+        else
+        {
+            mensaje = $" No hay stock disponible de '{producto.Nombre}'.";
+            claseAlerta = "alert-warning";
+        }
+
+        await CargarProductos();
+        LimpiarMensajeDespues();
+    }
+
+    private async Task SolicitarProducto(Producto producto)
+    {
+        mensaje = $" Solicitud enviada para reabastecer '{producto.Nombre}'.";
+        claseAlerta = "alert-info";
+
+      
+        StateHasChanged();
+        LimpiarMensajeDespues();
+    }
+
+    private void VolverABusqueda()
+    {
+        NavigationManager.NavigateTo("/ChocoReparaciones/Inventario");
+    }
+
+    private void IrANuevoProducto()
+    {
+        NavigationManager.NavigateTo("/ChocoReparaciones/NuevoProducto/crear");
+    }
+
+    private void LimpiarMensajeDespues()
+    {
+        Task.Delay(3000).ContinueWith(_ =>
+        {
+            mensaje = "";
+            InvokeAsync(StateHasChanged);
+        });
+    }
+}
