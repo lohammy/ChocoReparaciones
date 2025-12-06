@@ -1,0 +1,378 @@
+﻿@page "/ChocoReparaciones/Inventario"
+@attribute [Authorize(Roles = "Admin,Tecnico")]
+@using ChocoReparaciones.Models
+@using ChocoReparaciones.Services
+@using Microsoft.AspNetCore.Authorization
+@inject ProductoServices ProductoServices
+@inject NavigationManager NavigationManager
+
+@rendermode InteractiveServer
+
+<PageTitle>Inventario de Repuestos</PageTitle>
+
+<div class="dashboard-container">
+    <!-- Sidebar izquierdo - solo barra verde vacía -->
+    <div class="sidebar">
+        <div class="sidebar-footer">
+            <div class="logo-container">
+                <i class="bi bi-tools"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="main-content">
+        <!-- Header dorado -->
+        <div class="content-header">
+            <h2 class="header-title">Inventario de Repuestos</h2>
+        </div>
+
+        <!-- Sección de Filtros Integrados -->
+        <div class="filters-section">
+            <div class="filters-container">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label class="filter-label">
+                            <i class="bi bi-search"></i>
+                            Buscar producto
+                        </label>
+                        <input type="text" class="filter-input" @bind="filtroNombre" @bind:event="oninput"
+                               @onkeyup="AplicarFiltros" placeholder="Ingrese el nombre del producto" />
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">
+                            <i class="bi bi-tags"></i>
+                            Categoría
+                        </label>
+                        <select class="filter-select" @bind="filtroCategoria" @bind:after="AplicarFiltros">
+                            <option value="">Todas las categorías</option>
+                            @foreach (var categoria in categoriasDisponibles)
+                            {
+                                <option value="@categoria">@categoria</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">
+                            <i class="bi bi-box-seam"></i>
+                            Estado Stock
+                        </label>
+                        <select class="filter-select" @bind="filtroStock" @bind:after="AplicarFiltros">
+                            <option value="">Todos</option>
+                            <option value="disponible">Con Stock</option>
+                            <option value="agotado">Agotado</option>
+                            <option value="bajo">Stock Bajo (&lt;5)</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-actions">
+                        <button type="button" class="btn-clear-filters" @onclick="LimpiarFiltros" title="Limpiar filtros">
+                            <i class="bi bi-arrow-clockwise"></i>
+                            Limpiar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Información de resultados -->
+                <div class="filter-results">
+                    <span class="results-count">
+                        @if (productosFiltrados != null)
+                        {
+                            <i class="bi bi-info-circle"></i>
+                            @if (productosFiltrados.Count == todosLosProductos?.Count)
+                            {
+                                <text>Mostrando todos los productos (@productosFiltrados.Count)</text>
+                            }
+                            else
+                            {
+                                <text>@productosFiltrados.Count de @(todosLosProductos?.Count ?? 0) productos</text>
+                            }
+                        }
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="action-buttons">
+            <button type="button" class="btn-secondary" @onclick="IrANuevoProducto">
+                <i class="bi bi-plus-circle"></i>
+                <span>Nuevo Producto</span>
+            </button>
+        </div>
+
+        <!-- Mensaje de estado -->
+        @if (!string.IsNullOrEmpty(mensaje))
+        {
+            <div class="alert @claseAlerta alert-dismissible fade show">
+                <div class="alert-content">
+                    @mensaje
+                </div>
+            </div>
+        }
+
+        <!-- Grid de productos -->
+        <div class="products-wrapper">
+            @if (productosFiltrados == null)
+            {
+                <div class="loading-state">
+                    <div class="spinner-large"></div>
+                    <p>Cargando productos...</p>
+                </div>
+            }
+            else if (!productosFiltrados.Any())
+            {
+                <div class="empty-state">
+                    @if (TieneFiltrosActivos())
+                    {
+                        <i class="bi bi-search"></i>
+                        <h3>No se encontraron productos</h3>
+                        <p>No hay productos que coincidan con los filtros aplicados.</p>
+                        <button class="btn-primary" @onclick="LimpiarFiltros">
+                            <i class="bi bi-arrow-clockwise"></i>
+                            Limpiar filtros
+                        </button>
+                    }
+                    else
+                    {
+                        <i class="bi bi-box-seam"></i>
+                        <h3>No hay productos en el inventario</h3>
+                        <p>Comience agregando productos al inventario.</p>
+                        <button class="btn-primary" @onclick="IrANuevoProducto">
+                            <i class="bi bi-plus-circle"></i>
+                            Agregar primer producto
+                        </button>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="products-grid">
+                    @foreach (var producto in productosFiltrados)
+                    {
+                        <div class="product-card @(producto.CantidadDisponible <= 0 ? "out-of-stock" : "")">
+                            <!-- Header de la tarjeta -->
+                            <div class="card-header">
+                                <div class="product-code">@GenerarCodigo(producto)</div>
+                                <div class="stock-indicator @GetStockClass(producto)">
+                                    <i class="@GetStockIcon(producto)"></i>
+                                    @GetStockText(producto)
+                                </div>
+                            </div>
+
+                            <!-- Información del producto -->
+                            <div class="product-info">
+                                <h3 class="product-name" title="@producto.Nombre">@producto.Nombre</h3>
+
+                                <div class="product-details">
+                                    <div class="detail-item">
+                                        <span class="detail-label">Categoría:</span>
+                                        <span class="detail-value">@producto.Categoria</span>
+                                    </div>
+
+                                    <div class="detail-item">
+                                        <span class="detail-label">Stock:</span>
+                                        <span class="detail-value stock-@GetStockClass(producto)">
+                                            @producto.CantidadDisponible unidades
+                                        </span>
+                                    </div>
+
+                                    <div class="detail-item">
+                                        <span class="detail-label">Precio:</span>
+                                        <span class="detail-value price">$@producto.Precio.ToString("N2")</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Acciones de la tarjeta -->
+                            <div class="card-actions">
+                                @if (producto.CantidadDisponible > 0)
+                                {
+                                    <button class="btn-action btn-use" @onclick="() => UsarEnReparacion(producto)"
+                                            title="Usar en reparación">
+                                        <i class="bi bi-wrench"></i>
+                                        <span>Usar en reparación</span>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn-action btn-request" @onclick="() => SolicitarProducto(producto)"
+                                            title="Solicitar reabastecimiento">
+                                        <i class="bi bi-cart-plus"></i>
+                                        <span>Solicitar</span>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Producto>? todosLosProductos;
+    private List<Producto>? productosFiltrados;
+    private List<string> categoriasDisponibles = new();
+
+    // Variables de filtros
+    private string filtroNombre = string.Empty;
+    private string filtroCategoria = string.Empty;
+    private string filtroStock = string.Empty;
+
+    // Variables para mensajes
+    private string mensaje = string.Empty;
+    private string claseAlerta = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarProductos();
+        CargarFiltros();
+        AplicarFiltros();
+    }
+
+    private async Task CargarProductos()
+    {
+        try
+        {
+            todosLosProductos = await ProductoServices.Listar(p => true);
+        }
+        catch (Exception ex)
+        {
+            mensaje = $"❌ Error al cargar productos: {ex.Message}";
+            claseAlerta = "alert-danger";
+            todosLosProductos = new List<Producto>();
+        }
+    }
+
+    private void CargarFiltros()
+    {
+        if (todosLosProductos != null && todosLosProductos.Any())
+        {
+            categoriasDisponibles = todosLosProductos
+                .Where(p => !string.IsNullOrEmpty(p.Categoria))
+                .Select(p => p.Categoria)
+                .Distinct()
+                .OrderBy(c => c)
+                .ToList();
+        }
+    }
+
+    private void AplicarFiltros()
+    {
+        if (todosLosProductos == null)
+        {
+            productosFiltrados = new List<Producto>();
+            return;
+        }
+
+        productosFiltrados = todosLosProductos.Where(p =>
+            // Filtro por nombre
+            (string.IsNullOrEmpty(filtroNombre) ||
+             p.Nombre.Contains(filtroNombre, StringComparison.OrdinalIgnoreCase)) &&
+
+            // Filtro por categoría
+            (string.IsNullOrEmpty(filtroCategoria) ||
+             p.Categoria.Equals(filtroCategoria, StringComparison.OrdinalIgnoreCase)) &&
+
+            // Filtro por stock
+            (string.IsNullOrEmpty(filtroStock) ||
+             (filtroStock == "disponible" && p.CantidadDisponible > 5) ||
+             (filtroStock == "agotado" && p.CantidadDisponible == 0) ||
+             (filtroStock == "bajo" && p.CantidadDisponible > 0 && p.CantidadDisponible <= 5))
+        ).ToList();
+
+        StateHasChanged();
+    }
+
+    private void LimpiarFiltros()
+    {
+        filtroNombre = string.Empty;
+        filtroCategoria = string.Empty;
+        filtroStock = string.Empty;
+        AplicarFiltros();
+        mensaje = "";
+    }
+
+    private bool TieneFiltrosActivos()
+    {
+        return !string.IsNullOrEmpty(filtroNombre) ||
+               !string.IsNullOrEmpty(filtroCategoria) ||
+               !string.IsNullOrEmpty(filtroStock);
+    }
+
+    private string GetStockClass(Producto producto)
+    {
+        if (producto.CantidadDisponible <= 0) return "agotado";
+        if (producto.CantidadDisponible <= 5) return "bajo";
+        return "disponible";
+    }
+
+    private string GetStockIcon(Producto producto)
+    {
+        if (producto.CantidadDisponible <= 0) return "bi bi-x-circle-fill";
+        if (producto.CantidadDisponible <= 5) return "bi bi-exclamation-triangle-fill";
+        return "bi bi-check-circle-fill";
+    }
+
+    private string GetStockText(Producto producto)
+    {
+        if (producto.CantidadDisponible <= 0) return "Agotado";
+        if (producto.CantidadDisponible <= 5) return "Stock Bajo";
+        return "Disponible";
+    }
+
+    private string GenerarCodigo(Producto producto)
+    {
+        var prefijo = producto.Categoria?.Substring(0, Math.Min(3, producto.Categoria.Length)).ToUpper() ?? "PRD";
+        var sufijo = producto.Id.ToString("D3");
+        return $"{prefijo}-{sufijo}";
+    }
+
+    private async Task UsarEnReparacion(Producto producto)
+    {
+        if (producto.CantidadDisponible > 0)
+        {
+            producto.CantidadDisponible--;
+            await ProductoServices.Guardar(producto);
+
+            mensaje = $"✅ '{producto.Nombre}' usado en reparación. Stock actualizado.";
+            claseAlerta = "alert-success";
+        }
+        else
+        {
+            mensaje = $"⚠️ No hay stock disponible de '{producto.Nombre}'.";
+            claseAlerta = "alert-warning";
+        }
+
+        await CargarProductos();
+        AplicarFiltros();
+        LimpiarMensajeDespues();
+    }
+
+    private async Task SolicitarProducto(Producto producto)
+    {
+        mensaje = $"📋 Solicitud enviada para reabastecer '{producto.Nombre}'.";
+        claseAlerta = "alert-info";
+
+        StateHasChanged();
+        LimpiarMensajeDespues();
+    }
+
+    private void IrANuevoProducto()
+    {
+        NavigationManager.NavigateTo("/ChocoReparaciones/NuevoProducto/crear");
+    }
+
+    private void LimpiarMensajeDespues()
+    {
+        Task.Delay(3000).ContinueWith(_ =>
+        {
+            mensaje = "";
+            InvokeAsync(StateHasChanged);
+        });
+    }
+}
