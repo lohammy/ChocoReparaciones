@@ -13,7 +13,7 @@ namespace ChocoReparaciones.Models
 		public string? Nombre { get; set; }
 
 		[Required(ErrorMessage = "La descripción es obligatoria.")]
-		[StringLength(300, ErrorMessage = "La descripción no puede superar los 300 caracteres.")]
+		[StringLength(30, ErrorMessage = "La descripción no puede superar los 30 caracteres.")]
 		public string? Descripcion { get; set; }
 
 		[Required(ErrorMessage = "La categoría es obligatoria.")]
