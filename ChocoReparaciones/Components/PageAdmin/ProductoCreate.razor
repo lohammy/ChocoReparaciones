@@ -3,20 +3,11 @@
 @using ChocoReparaciones.Services
 @inject ProductoServices ProductoServices
 @inject NavigationManager navigationManager
-@inject IWebHostEnvironment env
 @rendermode InteractiveServer
 
 <PageTitle>Registrar Producto</PageTitle>
 
 <div class="dashboard-container">
-    <div class="sidebar">
-        <div class="sidebar-footer">
-            <div class="logo-container">
-                <i class="bi bi-tools"></i>
-            </div>
-        </div>
-    </div>
-
     <div class="main-content">
         <div class="content-header">
             <h2 class="header-title">Registrar Nuevo Producto</h2>
@@ -24,75 +15,54 @@
 
         <div class="form-wrapper">
             <div class="form-container">
-                <EditForm Model="producto" OnValidSubmit="GuardarProducto">
+                <EditForm Model="producto" OnValidSubmit="Guardar">
                     <DataAnnotationsValidator />
 
-                    @if (showValidationSummary)
-                    {
-                        <div class="validation-alerts">
-                            <div class="alert alert-danger">
-                                <ul class="validation-list">
-                                    <li>La descripción es obligatoria.</li>
-                                    <li>La categoría es obligatoria.</li>
-                                    <li>El precio debe ser mayor a 0.</li>
-                                </ul>
-                            </div>
-                        </div>
-                    }
-
-                    <div class="form-field">
-                        <label class="field-label">Nombre del Producto</label>
-                        <InputText class="field-input" @bind-Value="producto.Nombre" placeholder="Ingrese el nombre del producto" />
-                        <ValidationMessage For="@(() => producto.Nombre)" class="field-error" />
+                    <div class="form-group">
+                        <label class="form-label">Nombre del Producto</label>
+                        <InputText class="form-control" @bind-Value="producto.Nombre" placeholder="Ingrese el nombre del producto" />
+                        <ValidationMessage For="@(() => producto.Nombre)" />
                     </div>
 
-                    <div class="form-field">
-                        <label class="field-label">Categoría</label>
-                        <InputSelect class="field-select" @bind-Value="producto.Categoria">
+                    <div class="form-group">
+                        <label class="form-label">Categoría</label>
+                        <InputSelect class="form-control" @bind-Value="producto.Categoria">
                             <option value="">Seleccione una categoría</option>
-                            <option value="Repuestos">Repuestos</option>
-                            <option value="Tecnología">Tecnología</option>
-                            <option value="Accesorios">Accesorios</option>
-                            <option value="Herramientas">Herramientas</option>
+                            <option>Repuestos</option>
+                            <option>Tecnología</option>
+                            <option>Herramientas</option>
                         </InputSelect>
-                        <ValidationMessage For="@(() => producto.Categoria)" class="field-error" />
+                        <ValidationMessage For="@(() => producto.Categoria)" />
                     </div>
 
-                    <div class="form-field">
-                        <label class="field-label">Descripción</label>
-                        <InputTextArea class="field-textarea" @bind-Value="producto.Descripcion" placeholder="Describa el producto..." rows="4" />
-                        <ValidationMessage For="@(() => producto.Descripcion)" class="field-error" />
+                    <div class="form-group">
+                        <label class="form-label">Descripción</label>
+                        <InputTextArea class="form-control" @bind-Value="producto.Descripcion" placeholder="Describa el producto..." rows="4" />
+                        <ValidationMessage For="@(() => producto.Descripcion)" />
                     </div>
 
                     <div class="form-row">
-                        <div class="form-field">
-                            <label class="field-label">Precio (RD$)</label>
-                            <InputNumber class="field-input" @bind-Value="producto.Precio" step="0.01" placeholder="0.00" />
-                            <ValidationMessage For="@(() => producto.Precio)" class="field-error" />
+                        <div class="form-group">
+                            <label class="form-label">Precio (RD$)</label>
+                            <InputNumber class="form-control" @bind-Value="producto.Precio" step="0.01" placeholder="0.00" />
+                            <ValidationMessage For="@(() => producto.Precio)" />
                         </div>
 
-                        <div class="form-field">
-                            <label class="field-label">Cantidad Disponible</label>
-                            <InputNumber class="field-input" @bind-Value="producto.CantidadDisponible" placeholder="0" />
-                            <ValidationMessage For="@(() => producto.CantidadDisponible)" class="field-error" />
+                        <div class="form-group">
+                            <label class="form-label">Cantidad Disponible</label>
+                            <InputNumber class="form-control" @bind-Value="producto.CantidadDisponible" placeholder="0" />
+                            <ValidationMessage For="@(() => producto.CantidadDisponible)" />
                         </div>
                     </div>
 
                     <div class="form-actions">
                         <button type="submit" class="btn-primary" disabled="@isProcessing">
-                            @if (isProcessing)
-                            {
-                                <span class="spinner"></span>
-                                <span>Guardando...</span>
-                            }
-                            else
-                            {
-                                <span>Guardar Producto</span>
-                            }
+                            Guardar Producto
                         </button>
                     </div>
 
-                    <ValidationSummary class="d-none" />
+                    <p class="text-center text-danger mt-3">@mensaje</p>
+                    <p class="text-center text-success mt-3">@exito</p>
                 </EditForm>
             </div>
         </div>
@@ -101,27 +71,42 @@
 
 @code {
     private Producto producto = new();
-    private bool showValidationSummary = false;
     private bool isProcessing = false;
+    private string? mensaje;
+    private string? exito;
 
-    private async Task GuardarProducto()
+    private async Task<bool> Validar()
     {
-        showValidationSummary = false;
+        var existe = await ProductoServices.ExisteProducto(producto.Id, producto.Nombre ?? "");
+        return existe;
+    }
+
+    private async Task Guardar()
+    {
+        mensaje = null;
+        exito = null;
+
+        if (await Validar())
+        {
+            mensaje = "Ya existe un producto con ese nombre.";
+            return;
+        }
+
         isProcessing = true;
 
-        try
+        var guardado = await ProductoServices.Guardar(producto);
+
+        if (guardado)
         {
-            await ProductoServices.Guardar(producto);
-            navigationManager.NavigateTo("/Inventario");
+            exito = "El producto se creó correctamente.";
+            await Task.Delay(1500);
+            navigationManager.NavigateTo("/ChocoReparaciones/Inventario");
         }
-        catch (Exception)
+        else
         {
-            showValidationSummary = true;
+            mensaje = "No se pudo crear el producto.";
         }
-        finally
-        {
-            isProcessing = false;
-            StateHasChanged();
-        }
+
+        isProcessing = false;
     }
 }
