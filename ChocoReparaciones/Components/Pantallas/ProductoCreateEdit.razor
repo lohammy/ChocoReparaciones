@@ -10,24 +10,26 @@
 
 <PageTitle>@(Id > 0 ? "Editar Producto" : "Crear Producto")</PageTitle>
 
-<EditForm Model="producto" OnValidSubmit="Guardar">
+<EditForm Model="producto" OnValidSubmit="Guardar" formname="frmProducto">
     <DataAnnotationsValidator />
+
     <div class="container">
         <div class="card shadow-lg">
+
             <div class="card-header text-center">
                 <h5 class="card-title">@(Id > 0 ? "Editar Producto" : "Crear Producto")</h5>
             </div>
 
             <div class="card-body">
 
-                @*Nombre*@
+                <!-- Nombre -->
                 <div class="mb-3">
                     <label class="form-label">Nombre</label>
                     <InputText class="form-control" @bind-Value="producto.Nombre"></InputText>
                     <ValidationMessage For="(() => producto.Nombre)" />
                 </div>
 
-                @*Categoria*@
+                <!-- Categoría -->
                 <div class="mb-3">
                     <label class="form-label">Categoría</label>
                     <InputSelect class="form-control" @bind-Value="producto.Categoria">
@@ -40,36 +42,39 @@
                     <ValidationMessage For="(() => producto.Categoria)" />
                 </div>
 
-                @*Descripcion*@
+                <!-- Descripción -->
                 <div class="mb-3">
                     <label class="form-label">Descripción</label>
                     <InputTextArea class="form-control" @bind-Value="producto.Descripcion" rows="3"></InputTextArea>
                     <ValidationMessage For="(() => producto.Descripcion)" />
                 </div>
 
-                @*Precio*@
+                <!-- Precio -->
                 <div class="mb-3">
                     <label class="form-label">Precio</label>
                     <InputNumber class="form-control" @bind-Value="producto.Precio" step="0.01"></InputNumber>
                     <ValidationMessage For="(() => producto.Precio)" />
                 </div>
 
-                @*Cantidad*@
+                <!-- Cantidad -->
                 <div class="mb-3">
                     <label class="form-label">Cantidad Disponible</label>
                     <InputNumber class="form-control" @bind-Value="producto.CantidadDisponible"></InputNumber>
                     <ValidationMessage For="(() => producto.CantidadDisponible)" />
                 </div>
+
             </div>
 
-            @*footer*@
+            <!-- Footer -->
             <div class="card-footer text-center mt-2">
                 <a href="/ChocoReparaciones/Inventario" class="btn btn-secondary">
                     <span class="bi bi-arrow-left"></span> Volver
                 </a>
+
                 <button type="submit" class="btn btn-primary bi bi-floppy">
                     @(Id > 0 ? "Modificar" : "Guardar")
                 </button>
+
                 @if (Id > 0)
                 {
                     <button type="button" class="btn btn-danger bi bi-trash" @onclick="Eliminar">
@@ -97,6 +102,7 @@
         if (Id > 0)
         {
             var productoExistente = await ProductoServices.Buscar(Id);
+
             if (productoExistente != null)
             {
                 producto = productoExistente;
@@ -121,19 +127,17 @@
 
         if (guardado)
         {
-            Mensaje = Id > 0 ? "Modificado exitosamente." : "Creado exitosamente.";
             navigationManager.NavigateTo("/ChocoReparaciones/Inventario");
         }
         else
         {
-            Mensaje = Id > 0 ? "No se ha podido modificar el producto." : "No se ha podido crear el producto.";
+            Mensaje = "No se pudo guardar el producto.";
         }
     }
 
     public async Task<bool> Validar()
     {
-        var existe = await ProductoServices.ExisteProducto(producto.Id, producto.Nombre ?? "");
-        return existe;
+        return await ProductoServices.ExisteProducto(producto.Id, producto.Nombre ?? "");
     }
 
     public async Task Eliminar()
@@ -148,7 +152,7 @@
             }
             else
             {
-                Mensaje = "No se pudo eliminar el producto correctamente";
+                Mensaje = "No se pudo eliminar el producto.";
             }
         }
     }
