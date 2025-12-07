@@ -6,21 +6,19 @@ namespace ChocoReparaciones.Models
 	{
 		public int Id { get; set; }
 
-		[Required]
-		[RegularExpression(@"^[a-zA-Z\\s]+$", ErrorMessage = "En este campo solo se permiten letras.")]
+		[Required(ErrorMessage = "El nombre del cliente es obligatorio.")]
+		[RegularExpression(@"^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$", ErrorMessage = "Solo se permiten letras.")]
 		public string ClienteNombre { get; set; } = string.Empty;
 
 		[Required(ErrorMessage = "El número de teléfono es obligatorio.")]
 		[Phone(ErrorMessage = "El número de teléfono no es válido.")]
-		[Range(minimum: 9, maximum: 9, ErrorMessage = "Debe introducir un numero valido")]
+		[StringLength(15, MinimumLength = 9, ErrorMessage = "El teléfono debe tener entre 9 y 15 caracteres.")]
 		public string Telefono { get; set; } = "";
 
-		[Required]
-		[RegularExpression(@"^[a-zA-Z\\s]+$", ErrorMessage = "En este campo solo se permiten letras.")]
+		[Required(ErrorMessage = "La descripción del equipo es obligatoria.")]
 		public string DescripcionEquipo { get; set; } = string.Empty;
 
-		[Required]
-		[RegularExpression(@"^[a-zA-Z\\s]+$", ErrorMessage = "En este campo solo se permiten letras.")]
+		[Required(ErrorMessage = "El problema reportado es obligatorio.")]
 		public string ProblemaReportado { get; set; } = string.Empty;
 
 		public DateTime FechaIngreso { get; set; } = DateTime.Now;
@@ -37,7 +35,6 @@ namespace ChocoReparaciones.Models
 		[Required]
 		public DateTime FechaEntrega { get; set; } = DateTime.Today.AddDays(3);
 
-		// Navigation Property - Colección de detalles
 		public virtual ICollection<ReparacionDetalle> ReparacionDetalles { get; set; } = new List<ReparacionDetalle>();
 	}
 }
