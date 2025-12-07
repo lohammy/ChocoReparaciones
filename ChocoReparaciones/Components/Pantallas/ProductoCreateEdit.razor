@@ -1,0 +1,159 @@
+﻿@page "/ChocoReparaciones/NuevoProducto/crear"
+@page "/ChocoReparaciones/NuevoProducto/editar/{Id:int}"
+@attribute [Authorize(Roles = "Admin,Tecnico")]
+@using ChocoReparaciones.Models
+@using ChocoReparaciones.Services
+@using Microsoft.AspNetCore.Authorization
+@inject ProductoServices ProductoServices
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
+
+<PageTitle>@(Id > 0 ? "Editar Producto" : "Crear Producto")</PageTitle>
+
+<EditForm Model="producto" OnValidSubmit="Guardar" formname="frmProducto">
+    <DataAnnotationsValidator />
+
+    <div class="container">
+        <div class="card shadow-lg">
+
+            <div class="card-header text-center">
+                <h5 class="card-title">@(Id > 0 ? "Editar Producto" : "Crear Producto")</h5>
+            </div>
+
+            <div class="card-body">
+
+                <!-- Nombre -->
+                <div class="mb-3">
+                    <label class="form-label">Nombre</label>
+                    <InputText class="form-control" @bind-Value="producto.Nombre"></InputText>
+                    <ValidationMessage For="(() => producto.Nombre)" />
+                </div>
+
+                <!-- Categoría -->
+                <div class="mb-3">
+                    <label class="form-label">Categoría</label>
+                    <InputSelect class="form-control" @bind-Value="producto.Categoria">
+                        <option value="">Seleccione una categoría</option>
+                        <option>Repuestos</option>
+                        <option>Tecnología</option>
+                        <option>Herramientas</option>
+                        <option>Accesorios</option>
+                    </InputSelect>
+                    <ValidationMessage For="(() => producto.Categoria)" />
+                </div>
+
+                <!-- Descripción -->
+                <div class="mb-3">
+                    <label class="form-label">Descripción</label>
+                    <InputTextArea class="form-control" @bind-Value="producto.Descripcion" rows="3"></InputTextArea>
+                    <ValidationMessage For="(() => producto.Descripcion)" />
+                </div>
+
+                <!-- Precio -->
+                <div class="mb-3">
+                    <label class="form-label">Precio</label>
+                    <InputNumber class="form-control" @bind-Value="producto.Precio" step="0.01"></InputNumber>
+                    <ValidationMessage For="(() => producto.Precio)" />
+                </div>
+
+                <!-- Cantidad -->
+                <div class="mb-3">
+                    <label class="form-label">Cantidad Disponible</label>
+                    <InputNumber class="form-control" @bind-Value="producto.CantidadDisponible"></InputNumber>
+                    <ValidationMessage For="(() => producto.CantidadDisponible)" />
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+            <div class="card-footer text-center mt-2">
+                <a href="/ChocoReparaciones/Inventario" class="btn btn-secondary">
+                    <span class="bi bi-arrow-left"></span> Volver
+                </a>
+
+                <button type="submit" class="btn btn-primary bi bi-floppy">
+                    @(Id > 0 ? "Modificar" : "Guardar")
+                </button>
+
+                @if (Id > 0)
+                {
+                    <button type="button" class="btn btn-danger bi bi-trash" @onclick="Eliminar">
+                        Eliminar
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@Mensaje
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    public Producto producto { get; set; } = new Producto();
+    public string Mensaje { get; set; } = string.Empty;
+    public List<Producto> ListaProductos { get; set; } = new List<Producto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListaProductos = await ProductoServices.ListarProductos();
+
+        if (Id > 0)
+        {
+            var productoExistente = await ProductoServices.Buscar(Id);
+
+            if (productoExistente != null)
+            {
+                producto = productoExistente;
+            }
+            else
+            {
+                Mensaje = "Producto no encontrado";
+                producto = new Producto();
+            }
+        }
+    }
+
+    public async Task Guardar()
+    {
+        if (Id == 0 && await Validar())
+        {
+            Mensaje = "Ya existe un producto con este nombre.";
+            return;
+        }
+
+        var guardado = await ProductoServices.Guardar(producto);
+
+        if (guardado)
+        {
+            navigationManager.NavigateTo("/ChocoReparaciones/Inventario");
+        }
+        else
+        {
+            Mensaje = "No se pudo guardar el producto.";
+        }
+    }
+
+    public async Task<bool> Validar()
+    {
+        return await ProductoServices.ExisteProducto(producto.Id, producto.Nombre ?? "");
+    }
+
+    public async Task Eliminar()
+    {
+        if (Id > 0)
+        {
+            var eliminado = await ProductoServices.Eliminar(producto);
+
+            if (eliminado)
+            {
+                navigationManager.NavigateTo("/ChocoReparaciones/Inventario");
+            }
+            else
+            {
+                Mensaje = "No se pudo eliminar el producto.";
+            }
+        }
+    }
+}
