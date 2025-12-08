@@ -1,66 +1,105 @@
 ﻿@implements IDisposable
 @inject NavigationManager NavigationManager
 @using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <div class="nav-topbar shadow-sm px-4 py-2 d-flex align-items-center justify-content-between">
-	<div class="d-flex align-items-center text-white fw-semibold">
-		<i class="bi bi-person-circle me-2"></i>
-		@contextUser
-	</div>
-	<ul class="nav-link">
-
-		<AuthorizeView Roles="Admin">
-			<Authorized>
-				<li><a href="/ChocoReparaciones/Usuarios" class="@GetActive("/ChocoReparaciones/Usuarios")">Usuario</a></li>
-				<li><a href="/ChocoReparaciones/NuevoProducto/crear" class="@GetActive("/ChocoReparaciones/NuevoProducto")">Nuevo Producto</a></li>
-			</Authorized>
-		</AuthorizeView>
-		@* <li><a href="/" class="@GetActive("/", true)">Home</a></li> *@
-		<AuthorizeView Roles="Admin, Tecnico, Cajero">
-			<Authorized>
-				<li><a href="/ChocoReparaciones/Reparaciones" class="@GetActive("/ChocoReparaciones/Reparacion")">Reparación</a></li>
-			</Authorized>
-		</AuthorizeView>
-
-		<AuthorizeView Roles="Admin, Tecnico">
-			<Authorized>
-				<li><a href="/ChocoReparaciones/Inventario" class="@GetActive("/ChocoReparaciones/Inventario")">Inventario</a></li>
-			</Authorized>
-		</AuthorizeView>
-		<li><a href="/Account/Login" class="@GetActive("/Account/Login")">Iniciar sesión</a></li>
-	</ul>
+    <div class="d-flex align-items-center text-white fw-semibold">
+        <i class="bi bi-person-circle me-2"></i>
+        @contextUser
+    </div>
+    <ul class="nav-link">
+        <AuthorizeView Roles="Admin">
+            <Authorized>
+                <li><a href="/ChocoReparaciones/Usuarios" class="@GetActive("/ChocoReparaciones/Usuarios")">Usuario</a></li>
+            </Authorized>
+        </AuthorizeView>
+        <AuthorizeView Roles="Admin, Tecnico, Cajero">
+            <Authorized>
+                <li><a href="/ChocoReparaciones/Reparaciones" class="@GetActive("/ChocoReparaciones/Reparacion")">Reparación</a></li>
+            </Authorized>
+        </AuthorizeView>
+        <AuthorizeView Roles="Admin">
+            <Authorized>
+                <li><a href="/ChocoReparaciones/NuevoProducto/crear" class="@GetActive("/ChocoReparaciones/NuevoProducto")">Nuevo Producto</a></li>
+            </Authorized>
+        </AuthorizeView>
+        <AuthorizeView Roles="Admin, Tecnico">
+            <Authorized>
+                <li><a href="/ChocoReparaciones/Inventario" class="@GetActive("/ChocoReparaciones/Inventario")">Inventario</a></li>
+            </Authorized>
+        </AuthorizeView>
+        <AuthorizeView Roles="Admin, Tecnico, Cajero">
+            <Authorized>
+                <li><a href="/ChocoReparaciones/Perfil" class="@GetActive("/ChocoReparaciones/Perfil")">Perfil</a></li>
+            </Authorized>
+        </AuthorizeView>
+        <AuthorizeView>
+            <NotAuthorized>
+                <li><a href="/Account/Login" class="@GetActive("/Account/Login")">Iniciar sesión</a></li>
+            </NotAuthorized>
+        </AuthorizeView>
+    </ul>
 </div>
 
 @code {
-	string contextUser = "";
+    string contextUser = "";
 
-	protected override void OnInitialized()
-	{
-		NavigationManager.LocationChanged += OnLocationChanged;
-	}
+    protected override async Task OnInitializedAsync()
+    {
+        NavigationManager.LocationChanged += OnLocationChanged;
+        await CargarUsuario();
+    }
 
-	private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
-	{
-		StateHasChanged();
-	}
+    private async Task CargarUsuario()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
-	private string GetActive(string url, bool isHome = false)
-	{
-		var currentUrl = NavigationManager.Uri;
-		var uri = new Uri(currentUrl);
-		var path = uri.AbsolutePath;
-		if (isHome)
-		{
-			return (path == "/" || path == "/Home") ? "active" : "";
-		}
-		else
-		{
-			return path.StartsWith(url, StringComparison.OrdinalIgnoreCase) ? "active" : "";
-		}
-	}
+        if (authState.User.Identity?.IsAuthenticated == true)
+        {
+            var nombre = authState.User.FindFirst("NombreCompleto")?.Value ??
+                        authState.User.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value ??
+                        authState.User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ??
+                        authState.User.Identity.Name;
 
-	public void Dispose()
-	{
-		NavigationManager.LocationChanged -= OnLocationChanged;
-	}
+            var rol = authState.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+
+            var nombreMostrar = !string.IsNullOrEmpty(nombre) ?
+                               (nombre.Length > 15 ? nombre.Split(' ')[0] : nombre) :
+                               "Usuario";
+
+            contextUser = !string.IsNullOrEmpty(rol) ? $"{nombreMostrar} ({rol})" : nombreMostrar;
+        }
+        else
+        {
+            contextUser = "No autenticado";
+        }
+
+        StateHasChanged();
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        StateHasChanged();
+    }
+
+    private string GetActive(string url, bool isHome = false)
+    {
+        var currentUrl = NavigationManager.Uri;
+        var uri = new Uri(currentUrl);
+        var path = uri.AbsolutePath;
+        if (isHome)
+        {
+            return (path == "/" || path == "/Home") ? "active" : "";
+        }
+        else
+        {
+            return path.StartsWith(url, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+        }
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
 }

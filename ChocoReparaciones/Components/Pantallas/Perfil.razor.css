@@ -1,0 +1,250 @@
+﻿.container {
+	max-width: 600px;
+	margin: 0 auto;
+	padding: 2rem 1rem;
+}
+
+.card {
+	border: none;
+	border-radius: 15px;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+	overflow: visible;
+	margin-top: 3rem;
+}
+
+.card-header {
+	background: #E6A502;
+	color: white;
+	border-bottom: none;
+	padding: 1.25rem 1.5rem;
+	position: relative;
+	z-index: 2;
+	transform: translateY(-50%);
+	margin-bottom: -1rem;
+	border-radius: 15px 15px 0 0;
+	box-shadow: 0 5px 15px rgba(230, 165, 2, 0.2);
+	width: 80%;
+	margin-left: auto;
+	margin-right: auto;
+	text-align: left;
+}
+
+.card-title {
+	color: #fff;
+	margin: 0;
+	font-size: 1.25rem;
+	font-weight: 700;
+	text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.card-body {
+	padding: 3rem 2rem 2rem 2rem;
+	position: relative;
+	z-index: 1;
+}
+
+.profile-info {
+	margin-bottom: 2rem;
+}
+
+.info-item {
+	margin-bottom: 1.5rem;
+	padding: 1rem;
+	background: #f8f9fa;
+	border-radius: 8px;
+	border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+	.info-item:last-child {
+		margin-bottom: 0;
+	}
+
+	.info-item label {
+		display: block;
+		font-weight: 600;
+		color: #495057;
+		margin-bottom: 0.5rem;
+		font-size: 0.9rem;
+	}
+
+.info-value {
+	font-size: 1.1rem;
+	color: #2c3e50;
+	font-weight: 500;
+}
+
+.role-badge {
+	padding: 0.5rem 1rem;
+	border-radius: 20px;
+	font-weight: 600;
+	font-size: 0.9rem;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	display: inline-block;
+}
+
+.role-admin {
+	background: rgba(220, 53, 69, 0.1);
+	color: #dc3545;
+	border: 1px solid rgba(220, 53, 69, 0.2);
+}
+
+.role-tecnico {
+	background: rgba(13, 110, 253, 0.1);
+	color: #0d6efd;
+	border: 1px solid rgba(13, 110, 253, 0.2);
+}
+
+.role-cajero {
+	background: rgba(40, 167, 69, 0.1);
+	color: #28a745;
+	border: 1px solid rgba(40, 167, 69, 0.2);
+}
+
+.role-default {
+	background: rgba(108, 117, 125, 0.1);
+	color: #6c757d;
+	border: 1px solid rgba(108, 117, 125, 0.2);
+}
+
+.profile-actions {
+	text-align: center;
+	padding-top: 1rem;
+	border-top: 1px solid #e9ecef;
+}
+
+.btn {
+	padding: 0.75rem 1.5rem;
+	border-radius: 8px;
+	font-weight: 600;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	text-decoration: none;
+	border: none;
+	cursor: pointer;
+}
+
+.btn-danger {
+	background: #dc3545;
+	color: white;
+}
+
+	.btn-danger:hover {
+		background: #c82333;
+	}
+
+.btn-secondary {
+	background: #6c757d;
+	color: white;
+}
+
+	.btn-secondary:hover {
+		background: #5a6268;
+	}
+
+.logout-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(0, 0, 0, 0.5);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+}
+
+.logout-modal {
+	background: white;
+	border-radius: 12px;
+	max-width: 400px;
+	width: 90%;
+	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+	overflow: hidden;
+}
+
+.modal-header {
+	background: #dc3545;
+	color: white;
+	padding: 1rem 1.5rem;
+	text-align: center;
+}
+
+	.modal-header h5 {
+		margin: 0;
+		font-weight: 600;
+		font-size: 1.1rem;
+	}
+
+.modal-body {
+	padding: 1.5rem;
+	text-align: center;
+}
+
+	.modal-body p {
+		margin: 0;
+		color: #2c3e50;
+		font-size: 1rem;
+	}
+
+.modal-actions {
+	padding: 1rem 1.5rem;
+	display: flex;
+	gap: 1rem;
+	justify-content: center;
+}
+
+	.modal-actions .btn {
+		min-width: 120px;
+	}
+
+	.modal-actions a.btn {
+		text-decoration: none;
+		color: white;
+	}
+
+		.modal-actions a.btn:hover {
+			color: white;
+			text-decoration: none;
+		}
+
+@media (max-width: 768px) {
+	.card {
+		margin-top: 2rem;
+	}
+
+	.card-header {
+		width: 90%;
+		transform: translateY(-40%);
+	}
+
+	.card-body {
+		padding: 2.5rem 1rem 1rem 1rem;
+	}
+}
+
+@media (max-width: 576px) {
+	.card-header {
+		width: 95%;
+		transform: translateY(-30%);
+		padding: 1rem;
+	}
+
+	.card-title {
+		font-size: 1.1rem;
+	}
+
+	.modal-actions {
+		flex-direction: column;
+	}
+
+		.modal-actions .btn {
+			min-width: auto;
+		}
+
+	.logout-modal {
+		margin: 1rem;
+	}
+}
