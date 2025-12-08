@@ -104,6 +104,8 @@
             await emailStore.SetEmailAsync(user, nuevoUsuario.Email, CancellationToken.None);
             user.EmailConfirmed = true;
 
+            user.NombreCompleto = nuevoUsuario.Nombre;
+
             var result = await UserManager.CreateAsync(user, nuevoUsuario.Contrasena);
             if (result.Succeeded && !string.IsNullOrEmpty(nuevoUsuario.Rol))
             {
