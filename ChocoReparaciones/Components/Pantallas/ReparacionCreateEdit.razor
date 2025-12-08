@@ -1,0 +1,309 @@
+﻿@page "/ChocoReparaciones/Reparaciones/crear"
+@page "/ChocoReparaciones/Reparaciones/editar/{Id:int}"
+@attribute [Authorize(Roles = "Admin,Tecnico, Cajero")]
+@using ChocoReparaciones.Models
+@using ChocoReparaciones.Services
+@using Microsoft.AspNetCore.Authorization
+@inject ReparacionServices reparacionServices
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
+
+<PageTitle>@(Id > 0 ? "Editar Reparación" : "Crear Reparación")</PageTitle>
+
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header text-center">
+            <h5 class="card-title">@(Id > 0 ? "Editar Reparación" : "Crear Reparación")</h5>
+        </div>
+
+        <div class="card-body">
+            <EditForm Model="reparacion" OnValidSubmit="Guardar" FormName="formReparacion">
+                <DataAnnotationsValidator />
+
+                <div class="mb-3">
+                    <label class="form-label">Fecha de Ingreso</label>
+                    <InputDate class="form-control" @bind-Value="reparacion.FechaIngreso" />
+                    <ValidationMessage For="@(() => reparacion.FechaIngreso)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">ReparacionId</label>
+                    <InputNumber class="form-control bg-light text-secondary" @bind-Value="reparacion.Id" readonly />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Nombre del Cliente</label>
+                    <InputText class="form-control" @bind-Value="reparacion.ClienteNombre" />
+                    <ValidationMessage For="@(() => reparacion.ClienteNombre)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Teléfono</label>
+                    <InputText class="form-control" @bind-Value="reparacion.Telefono" />
+                    <ValidationMessage For="@(() => reparacion.Telefono)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Descripción del Equipo</label>
+                    <InputText class="form-control" @bind-Value="reparacion.DescripcionEquipo" />
+                    <ValidationMessage For="@(() => reparacion.DescripcionEquipo)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Problema Reportado</label>
+                    <InputTextArea class="form-control" @bind-Value="reparacion.ProblemaReportado" rows="3" />
+                    <ValidationMessage For="@(() => reparacion.ProblemaReportado)" />
+                </div>
+
+                <div class="row">
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <label class="form-label">Estado</label>
+                            <InputSelect class="form-control" @bind-Value="reparacion.Estado">
+                                <option value="Pendiente">Pendiente</option>
+                                <option value="En Proceso">En Proceso</option>
+                                <option value="Completada">Completada</option>
+                                <option value="Entregada">Entregada</option>
+                            </InputSelect>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <label class="form-label">Prioridad</label>
+                            <InputSelect class="form-control" @bind-Value="reparacion.Prioridad">
+                                <option value="Baja">Baja</option>
+                                <option value="Media">Media</option>
+                                <option value="Alta">Alta</option>
+                                <option value="Urgente">Urgente</option>
+                            </InputSelect>
+                            <ValidationMessage For="@(() => reparacion.Prioridad)" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Fecha de Entrega</label>
+                    <InputDate class="form-control" @bind-Value="reparacion.FechaEntrega" />
+                    <ValidationMessage For="@(() => reparacion.FechaEntrega)" />
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(Mensaje))
+                {
+                    <div class="alert alert-danger">@Mensaje</div>
+                }
+
+                <div class="border border-success p-3 mt-3">
+                    <h5><strong>Productos Utilizados</strong></h5>
+
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            @errorMessage
+                            <button type="button" class="btn-close" @onclick="@(() => errorMessage = string.Empty)"></button>
+                        </div>
+                    }
+
+                    <div class="input-group align-items-center mt-2">
+                        <InputSelect class="form-select" @bind-Value="DetalleSeleccionado.ProductoId">
+                            <option value="0" selected disabled>Seleccione un producto</option>
+                            @foreach (var producto in ListaProductos)
+                            {
+                                <option value="@producto.Id">@producto.Nombre (Stock: @producto.CantidadDisponible) - @producto.Precio.ToString("C")</option>
+                            }
+                        </InputSelect>
+                        <label class="col-form-label input-group-text">Cantidad:</label>
+                        <InputNumber class="form-control" @bind-Value="DetalleSeleccionado.Cantidad" />
+                        <button type="button" class="btn btn-outline-success bi bi-plus" @onclick="AgregarDetalle"> Agregar</button>
+                    </div>
+
+                    @*detalle *@
+                    @if (reparacion.ReparacionDetalles.Any())
+                    {
+                        <table class="table table-bordered mt-3">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Cantidad</th>
+                                    <th>Precio</th>
+                                    <th>Total</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var detalle in reparacion.ReparacionDetalles)
+                                {
+                                    var producto = ListaProductos.FirstOrDefault(p => p.Id == detalle.ProductoId);
+                                    <tr>
+                                        <td>@(producto?.Nombre ?? "N/A")</td>
+                                        <td>@detalle.Cantidad</td>
+                                        <td>@detalle.Precio.ToString("C")</td>
+                                        <td>@((detalle.Cantidad * detalle.Precio).ToString("C"))</td>
+                                        <td>
+                                            <button type="button" class="btn btn-danger bi bi-trash"
+                                                    @onclick="@(() => RemoverDetalle(detalle))">
+                                                Remover
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+
+                        <div class="mt-2">
+                            <label><strong>Total: </strong>@reparacion.ReparacionDetalles.Sum(d => d.Cantidad * d.Precio).ToString("C")</label>
+                        </div>
+                    }
+                </div>
+
+                <div class="text-center mt-3">
+                    <a href="/ChocoReparaciones/Reparaciones" class="btn btn-secondary">
+                        <span class="bi bi-arrow-left"></span> Volver
+                    </a>
+
+                    <button type="submit" class="btn btn-primary bi bi-save">
+                        @(Id > 0 ? " Modificar" : " Guardar")
+                    </button>
+
+                    @if (Id > 0)
+                    {
+                        <button type="button" class="btn btn-danger bi bi-trash" @onclick="Eliminar">
+                            Eliminar
+                        </button>
+                    }
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    public Reparacion reparacion { get; set; } = new();
+    public ReparacionDetalle DetalleSeleccionado { get; set; } = new();
+    public List<Producto> ListaProductos { get; set; } = new();
+    public string Mensaje { get; set; } = string.Empty;
+    public string errorMessage { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListaProductos = await reparacionServices.ListarProductos();
+
+        if (Id > 0)
+        {
+            var reparacionExistente = await reparacionServices.Buscar(Id);
+            if (reparacionExistente != null)
+            {
+                reparacion = reparacionExistente;
+            }
+            else
+            {
+                Mensaje = "Reparación no encontrada";
+                reparacion = new Reparacion();
+            }
+        }
+        else
+        {
+            reparacion = new Reparacion
+            {
+                FechaIngreso = DateTime.Now,
+                FechaEntrega = DateTime.Today.AddDays(3),
+                ReparacionDetalles = new List<ReparacionDetalle>()
+            };
+        }
+    }
+
+    public void AgregarDetalle()
+    {
+        errorMessage = string.Empty;
+
+        if (DetalleSeleccionado.ProductoId == 0 || DetalleSeleccionado.Cantidad <= 0)
+        {
+            errorMessage = "Debe seleccionar un producto y una cantidad válida";
+            return;
+        }
+
+        var productoSeleccionado = ListaProductos.FirstOrDefault(p => p.Id == DetalleSeleccionado.ProductoId);
+
+        if (productoSeleccionado != null)
+        {
+            var cantidadYaAgregada = reparacion.ReparacionDetalles
+                .Where(d => d.ProductoId == DetalleSeleccionado.ProductoId)
+                .Sum(d => d.Cantidad);
+
+            if (cantidadYaAgregada + DetalleSeleccionado.Cantidad > productoSeleccionado.CantidadDisponible)
+            {
+                errorMessage = $"Stock insuficiente. Disponible: {productoSeleccionado.CantidadDisponible}, Ya agregado: {cantidadYaAgregada}";
+                return;
+            }
+
+            var precioTotal = productoSeleccionado.Precio * DetalleSeleccionado.Cantidad;
+
+            var detalleExistente = reparacion.ReparacionDetalles
+                .FirstOrDefault(d => d.ProductoId == DetalleSeleccionado.ProductoId);
+
+            if (detalleExistente != null)
+            {
+                detalleExistente.Cantidad += DetalleSeleccionado.Cantidad;
+                detalleExistente.Precio = productoSeleccionado.Precio;
+            }
+            else
+            {
+                reparacion.ReparacionDetalles.Add(new ReparacionDetalle
+                {
+                    ProductoId = productoSeleccionado.Id,
+                    Precio = productoSeleccionado.Precio,
+                    Cantidad = DetalleSeleccionado.Cantidad
+                });
+            }
+
+            DetalleSeleccionado = new ReparacionDetalle();
+        }
+    }
+
+    public void RemoverDetalle(ReparacionDetalle eliminarDetalle)
+    {
+        reparacion.ReparacionDetalles.Remove(eliminarDetalle);
+
+        DetalleSeleccionado.ProductoId = eliminarDetalle.ProductoId;
+        DetalleSeleccionado.Cantidad = eliminarDetalle.Cantidad;
+    }
+
+    public async Task Guardar()
+    {
+        Mensaje = string.Empty;
+
+        if (!reparacion.ReparacionDetalles.Any())
+        {
+            Mensaje = "Debe agregar al menos un producto a la reparación";
+            return;
+        }
+
+        var resultado = await reparacionServices.Guardar(reparacion);
+
+        if (resultado)
+        {
+            navigationManager.NavigateTo("/ChocoReparaciones/Reparaciones");
+        }
+        else
+        {
+            Mensaje = Id > 0 ? "No se pudo modificar la reparación" : "No se pudo guardar la reparación";
+        }
+    }
+
+    public async Task Eliminar()
+    {
+        if (Id > 0)
+        {
+            var eliminado = await reparacionServices.Eliminar(Id);
+            if (eliminado)
+            {
+                navigationManager.NavigateTo("/ChocoReparaciones/Reparaciones");
+            }
+            else
+            {
+                errorMessage = "No se pudo eliminar la reparación";
+            }
+        }
+    }
+}

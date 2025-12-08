@@ -1,0 +1,102 @@
+﻿@page "/ChocoReparaciones/Perfil"
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@rendermode InteractiveServer
+
+<PageTitle>Mi Perfil</PageTitle>
+
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header">
+            <h5 class="card-title">Mi Perfil</h5>
+        </div>
+
+        <div class="card-body">
+            <div class="profile-info">
+                <div class="info-item">
+                    <label>Usuario</label>
+                    <span class="info-value">@(NombreUsuario ?? "No disponible")</span>
+                </div>
+
+                <div class="info-item">
+                    <label>Rol</label>
+                    <span class="role-badge @GetRoleClass()">@(RolUsuario ?? "Sin rol")</span>
+                </div>
+            </div>
+
+            <div class="profile-actions">
+                <button @onclick="MostrarConfirmacion" class="btn btn-danger">
+                    <i class="bi bi-box-arrow-right"></i>
+                    Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (MostrarModal)
+{
+    <div class="logout-overlay" @onclick="CerrarModal">
+        <div class="logout-modal" @onclick:stopPropagation="true">
+            <div class="modal-header">
+                <h5>Confirmar Cierre de Sesión</h5>
+            </div>
+
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas cerrar tu sesión?</p>
+            </div>
+
+            <div class="modal-actions">
+                <button @onclick="CerrarModal" class="btn btn-secondary">Cancelar</button>
+                <a href="/Account/Login" class="btn btn-danger">Cerrar Sesión</a>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private string? NombreUsuario { get; set; }
+    private string? RolUsuario { get; set; }
+    private bool MostrarModal = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        if (authState.User.Identity?.IsAuthenticated == true)
+        {
+            NombreUsuario = authState.User.FindFirst("NombreCompleto")?.Value ??
+                           authState.User.FindFirst(ClaimTypes.GivenName)?.Value ??
+                           authState.User.FindFirst(ClaimTypes.Name)?.Value ??
+                           authState.User.Identity.Name;
+
+            var roles = authState.User.FindAll(ClaimTypes.Role).Select(r => r.Value).ToList();
+            RolUsuario = roles.FirstOrDefault();
+        }
+    }
+
+    private string GetRoleClass()
+    {
+        return RolUsuario?.ToLower() switch
+        {
+            "admin" => "role-admin",
+            "tecnico" => "role-tecnico",
+            "cajero" => "role-cajero",
+            _ => "role-default"
+        };
+    }
+
+    private void MostrarConfirmacion()
+    {
+        MostrarModal = true;
+    }
+
+    private void CerrarModal()
+    {
+        MostrarModal = false;
+    }
+}

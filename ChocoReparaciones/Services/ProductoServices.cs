@@ -1,56 +1,93 @@
 ﻿using ChocoReparaciones.Data;
 using ChocoReparaciones.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace ChocoReparaciones.Services;
 
-public class ProductoServices
+public class ProductoServices(IDbContextFactory<ApplicationDbContext> DbFactory)
 {
-	private readonly ApplicationDbContext _context;
+	public async Task<bool> Guardar(Producto producto)
+	{
+		await using var _context = await DbFactory.CreateDbContextAsync();
 
-	public ProductoServices(ApplicationDbContext context)
-	{
-		_context = context;
-	}
-
-	public async Task<List<Producto>> ObtenerTodos()
-	{
-		return await _context.Productos
-			.OrderByDescending(p => p.Id)
-			.ToListAsync();
-	}
-	public async Task<List<Producto>> ObtenerProductos()
-	{
-		return await _context.Productos
-			.Where(p => p.CantidadDisponible > 0)
-			.OrderByDescending(p => p.Id)
-			.ToListAsync();
-	}
-	public async Task AgregarProducto(Producto producto)
-	{
-		_context.Productos.Add(producto);
-		await _context.SaveChangesAsync();
-	}
-
-	public async Task<Producto?> ObtenerPorId(int id)
-	{
-		return await _context.Productos.FindAsync(id);
-	}
-
-	public async Task EliminarProducto(int id)
-	{
-		var producto = await _context.Productos.FindAsync(id);
-		if (producto != null)
+		if (!await Existe(producto.Id))
 		{
-			_context.Productos.Remove(producto);
-			await _context.SaveChangesAsync();
+			return await Insertar(producto);
+		}
+		else
+		{
+			return await Modificar(producto);
 		}
 	}
 
-	public async Task ActualizarProducto(Producto producto)
+	private async Task<bool> Existe(int productoId)
 	{
-		_context.Productos.Update(producto);
-		await _context.SaveChangesAsync();
+		await using var _context = await DbFactory.CreateDbContextAsync();
+
+		return await _context.Productos
+			.AnyAsync(p => p.Id == productoId);
+	}
+
+	private async Task<bool> Insertar(Producto producto)
+	{
+		await using var _context = await DbFactory.CreateDbContextAsync();
+
+		_context.Productos.Add(producto);
+		return await _context.SaveChangesAsync() > 0;
+	}
+
+	private async Task<bool> Modificar(Producto producto)
+	{
+		await using var _context = await DbFactory.CreateDbContextAsync();
+
+		_context.Update(producto);
+		return await _context.SaveChangesAsync() > 0;
+	}
+
+	public async Task<bool> Eliminar(Producto producto)
+	{
+		await using var _context = await DbFactory.CreateDbContextAsync();
+
+		return await _context.Productos
+			.AsNoTracking()
+			.Where(p => p.Id == producto.Id)
+			.ExecuteDeleteAsync() > 0;
+	}
+
+	public async Task<bool> ExisteProducto(int id, string nombre)
+	{
+		await using var _context = await DbFactory.CreateDbContextAsync();
+
+		return await _context.Productos
+			.AnyAsync(p => p.Id != id && p.Nombre!.ToLower() == nombre.ToLower());
+	}
+
+	public async Task<Producto?> Buscar(int id)
+	{
+		await using var _context = await DbFactory.CreateDbContextAsync();
+
+		return await _context.Productos
+			.AsNoTracking()
+			.FirstOrDefaultAsync(p => p.Id == id);
+	}
+
+	public async Task<List<Producto>> Listar(Expression<Func<Producto, bool>> criterio)
+	{
+		await using var _context = await DbFactory.CreateDbContextAsync();
+
+		return await _context.Productos
+			.AsNoTracking()
+			.Where(criterio)
+			.ToListAsync();
+	}
+
+	public async Task<List<Producto>> ListarProductos()
+	{
+		await using var _context = await DbFactory.CreateDbContextAsync();
+
+		return await _context.Productos
+			.AsNoTracking()
+			.ToListAsync();
 	}
 }
-

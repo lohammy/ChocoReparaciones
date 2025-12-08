@@ -1,0 +1,176 @@
+﻿@page "/ChocoReparaciones/Reparaciones"
+@attribute [Authorize(Roles = "Admin,Tecnico, Cajero")]
+@using System.Globalization;
+@using ChocoReparaciones.Models
+@using ChocoReparaciones.Services
+@using Microsoft.AspNetCore.Authorization
+@inject NavigationManager navigationManager
+@inject ReparacionServices reparacionServices
+@rendermode InteractiveServer
+
+<PageTitle>Gestión de Reparaciones</PageTitle>
+
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title">Gestión de Reparaciones</h5>
+            <a href="/ChocoReparaciones/Reparaciones/crear" class="btn btn-primary">
+                <span class="bi bi-plus-square"></span> Crear
+            </a>
+        </div>
+
+        <div class="card-body">
+            <div class="filters-section">
+                <div class="row align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label"><strong>Filtrar por</strong></label>
+                        <InputSelect class="form-select" @bind-Value="Filtro">
+                            <option value="" selected disabled>Selecciona una opción</option>
+                            <option value="ReparacionId">ID de Reparación</option>
+                            <option value="ClienteNombre">Cliente</option>
+                            <option value="Estado">Estado</option>
+                            <option value="DescripcionEquipo">Dispositivo</option>
+                        </InputSelect>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label"><strong>Búsqueda</strong></label>
+                        <div class="input-group">
+                            <input class="form-control" @bind="ValorFiltro" placeholder="Buscar reparación..." />
+                            <button type="button" class="btn btn-outline-primary" @onclick="Buscar">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-outline-secondary" @onclick="Restablecer">
+                            <i class="bi bi-arrow-clockwise"></i> 
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modern-table-container">
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Fecha</th>
+                            <th>Cliente</th>
+                            <th>Dispositivo</th>
+                            <th>Tipo de reparación</th>
+                            <th>Opciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (ListaReparaciones.Any())
+                        {
+                            @foreach (var reparacion in ListaReparaciones)
+                            {
+                                <tr>
+                                    <td class="id-cell">@FormatearID(reparacion.Id)</td>
+                                    <td>@reparacion.FechaIngreso.ToString("dd/MM/yyyy")</td>
+                                    <td>@reparacion.ClienteNombre</td>
+                                    <td>@reparacion.DescripcionEquipo</td>
+                                    <td>@ObtenerTipoReparacion(reparacion)</td>
+                                    <td class="text-center">
+                                        <a href="/ChocoReparaciones/Reparaciones/editar/@reparacion.Id"
+                                           class="btn btn-outline-primary btn-edit-table">
+                                            <i class="bi bi-pencil-square"></i> Editar
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" class="empty-state-row">
+                                    <div class="empty-state-content">
+                                        <i class="bi bi-tools"></i>
+                                        <p>No se encontraron reparaciones</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card-footer">
+            <span><strong>Total de reparaciones:</strong> @ListaReparaciones.Count()</span>
+        </div>
+    </div>
+</div>
+
+@code {
+    public List<Reparacion> ListaReparaciones { get; set; } = new List<Reparacion>();
+    public string Filtro { get; set; } = string.Empty;
+    public string ValorFiltro { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListaReparaciones = await reparacionServices.Listar(r => r.Id > 0);
+    }
+
+    private async Task Buscar()
+    {
+        if (!string.IsNullOrWhiteSpace(ValorFiltro))
+        {
+            if (Filtro == "ReparacionId" && int.TryParse(ValorFiltro, out int id))
+            {
+                ListaReparaciones = await reparacionServices.Listar(r => r.Id == id);
+            }
+            else if (Filtro == "ClienteNombre")
+            {
+                ListaReparaciones = await reparacionServices.Listar(r => r.ClienteNombre.ToLower().Contains(ValorFiltro.ToLower()));
+            }
+            else if (Filtro == "Estado")
+            {
+                ListaReparaciones = await reparacionServices.Listar(r => r.Estado.ToLower().Contains(ValorFiltro.ToLower()));
+            }
+            else if (Filtro == "DescripcionEquipo")
+            {
+                ListaReparaciones = await reparacionServices.Listar(r => r.DescripcionEquipo.ToLower().Contains(ValorFiltro.ToLower()));
+            }
+        }
+        else
+        {
+            ListaReparaciones = await reparacionServices.Listar(r => r.Id > 0);
+        }
+    }
+
+    private async Task Restablecer()
+    {
+        ListaReparaciones = await reparacionServices.Listar(r => r.Id > 0);
+        Filtro = string.Empty;
+        ValorFiltro = string.Empty;
+    }
+
+    private string FormatearID(int id)
+    {
+        return id.ToString("D4"); 
+    }
+
+    private string ObtenerTecnico(Reparacion reparacion)
+    {
+    
+        return "Angel Paredes"; 
+    }
+
+    private string ObtenerTipoReparacion(Reparacion reparacion)
+    {
+        if (reparacion.ReparacionDetalles?.Any() == true)
+        {
+            var productos = reparacion.ReparacionDetalles.Select(d => d.Producto?.Nombre ?? "").ToList();
+            if (productos.Any(p => p.ToLower().Contains("pantalla") || p.ToLower().Contains("display")))
+                return "Cambio de pantalla";
+            if (productos.Any(p => p.ToLower().Contains("bateria") || p.ToLower().Contains("battery")))
+                return "Cambio de batería";
+            if (productos.Any(p => p.ToLower().Contains("camara")))
+                return "Cambio de cámaras";
+            return "Reparación general";
+        }
+        return "Diagnóstico";
+    }
+}

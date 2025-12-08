@@ -1,0 +1,275 @@
+﻿@page "/ChocoReparaciones/Usuarios"
+@attribute [Authorize(Roles = "Admin")]
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using ChocoReparaciones.Data
+@inject UserManager<ApplicationUser> UserManager
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Gestión de Usuarios</PageTitle>
+
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header space-between">
+            <h5 class="card-title">Gestión de Usuarios</h5>
+            <a href="/Account/Register" class="btn btn-primary">
+                <span class="bi bi-plus-square"></span> Crear
+            </a>
+        </div>
+
+        <div class="card-body">
+            @*labels*@
+            <div class="row">
+                @*Filtrar por*@
+                <div class="col-3">
+                    <label class="col-form-label"><strong>Filtrar por</strong></label>
+                </div>
+                @*ValorFiltro*@
+                <div class="col-4">
+                    <label class="col-form-label"><strong>Búsqueda</strong></label>
+                </div>
+            </div>
+
+            @*Inputs y botones*@
+            <div class="row align-items-center">
+                @*filtro*@
+                <div class="col-3">
+                    <InputSelect class="form-select" @bind-Value="Filtro">
+                        <option value="" selected disabled>Elija una opción</option>
+                        <option value="Nombre">Nombre</option>
+                        <option value="Email">Correo Electrónico</option>
+                        <option value="Rol">Rol</option>
+                    </InputSelect>
+                </div>
+                @*Busqueda*@
+                <div class="col-4">
+                    <div class="input-group">
+                        <input class="form-control" @bind="ValorFiltro" placeholder="Buscar" />
+                        <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
+                    </div>
+                </div>
+            </div>
+
+            <table class="table table-hover">
+                <thead class="table table-striped">
+                    <tr>
+                        <th>Usuario ID</th>
+                        <th>Nombre</th>
+                        <th>Correo Electrónico</th>
+                        <th>Rol</th>
+                        <th>Opciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        int contador = 1;
+                    }
+                    @foreach (var usuario in ListaUsuarios)
+                    {
+                        <tr>
+                            <td>@contador</td>
+                            <td>@usuario.NombreCompleto</td>
+                            <td>@usuario.Email</td>
+                            <td>
+                                @usuario.Rol
+                            </td>
+                            <td class="text-center">
+                                <button type="button" class="btn btn-outline-danger bi bi-trash" @onclick="() => EliminarUsuario(usuario)">
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                        contador++;
+                    }
+                </tbody>
+            </table>
+
+            @if (!ListaUsuarios.Any())
+            {
+                <div class="text-center text-muted py-4">
+                    <i class="bi bi-people fs-1"></i>
+                    <p class="mt-2">No hay usuarios registrados</p>
+                </div>
+            }
+        </div>
+
+        <div class="card-footer space-between">
+            <label>Cantidad: @ListaUsuarios.Count()</label>
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Mensaje))
+{
+    <div class="alert alert-info alert-dismissible fade show mt-3" role="alert">
+        @Mensaje
+        <button type="button" class="btn-close" @onclick="() => Mensaje = string.Empty"></button>
+    </div>
+}
+
+@code {
+    public List<UsuarioSimple> ListaUsuarios { get; set; } = new List<UsuarioSimple>();
+    public string Filtro { get; set; } = string.Empty;
+    public string ValorFiltro { get; set; } = string.Empty;
+    public string Mensaje { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarUsuarios();
+    }
+
+    private async Task CargarUsuarios()
+    {
+        try
+        {
+            var usuarios = UserManager.Users.ToList();
+            ListaUsuarios = new List<UsuarioSimple>();
+
+            foreach (var user in usuarios)
+            {
+                var roles = await UserManager.GetRolesAsync(user);
+                var rol = roles.FirstOrDefault() ?? "Sin Rol";
+
+                ListaUsuarios.Add(new UsuarioSimple
+                {
+                    Id = user.Id,
+                    NombreCompleto = user.NombreCompleto,
+                    Email = user.Email ?? "",
+                    Rol = rol,
+                    UsuarioIdentity = user
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            Mensaje = $"Error al cargar usuarios: {ex.Message}";
+        }
+    }
+
+    private async Task Buscar()
+    {
+        if (ValorFiltro.Trim() != "")
+        {
+            if (Filtro == "Nombre")
+            {
+                var usuariosFiltrados = new List<UsuarioSimple>();
+                var usuarios = UserManager.Users.Where(u => u.NombreCompleto.ToLower().Contains(ValorFiltro.ToLower())).ToList();
+
+                foreach (var user in usuarios)
+                {
+                    var roles = await UserManager.GetRolesAsync(user);
+                    var rol = roles.FirstOrDefault() ?? "Sin Rol";
+
+                    usuariosFiltrados.Add(new UsuarioSimple
+                    {
+                        Id = user.Id,
+                        NombreCompleto = user.NombreCompleto,
+                        Email = user.Email ?? "",
+                        Rol = rol,
+                        UsuarioIdentity = user
+                    });
+                }
+                ListaUsuarios = usuariosFiltrados;
+            }
+            else if (Filtro == "Email")
+            {
+                var usuariosFiltrados = new List<UsuarioSimple>();
+                var usuarios = UserManager.Users.Where(u => u.Email!.ToLower().Contains(ValorFiltro.ToLower())).ToList();
+
+                foreach (var user in usuarios)
+                {
+                    var roles = await UserManager.GetRolesAsync(user);
+                    var rol = roles.FirstOrDefault() ?? "Sin Rol";
+
+                    usuariosFiltrados.Add(new UsuarioSimple
+                    {
+                        Id = user.Id,
+                        NombreCompleto = user.NombreCompleto,
+                        Email = user.Email ?? "",
+                        Rol = rol,
+                        UsuarioIdentity = user
+                    });
+                }
+                ListaUsuarios = usuariosFiltrados;
+            }
+            else if (Filtro == "Rol")
+            {
+                var usuariosFiltrados = new List<UsuarioSimple>();
+                var todosUsuarios = UserManager.Users.ToList();
+
+                foreach (var user in todosUsuarios)
+                {
+                    var roles = await UserManager.GetRolesAsync(user);
+                    var rol = roles.FirstOrDefault() ?? "Sin Rol";
+
+                    if (rol.ToLower().Contains(ValorFiltro.ToLower()))
+                    {
+                        usuariosFiltrados.Add(new UsuarioSimple
+                        {
+                            Id = user.Id,
+                            NombreCompleto = user.NombreCompleto,
+                            Email = user.Email ?? "",
+                            Rol = rol,
+                            UsuarioIdentity = user
+                        });
+                    }
+                }
+                ListaUsuarios = usuariosFiltrados;
+            }
+        }
+        else
+        {
+            await CargarUsuarios();
+        }
+    }
+
+    private async Task Restablecer()
+    {
+        await CargarUsuarios();
+        Filtro = string.Empty;
+        ValorFiltro = string.Empty;
+    }
+
+    private async Task EliminarUsuario(UsuarioSimple usuario)
+    {
+        try
+        {
+            var result = await UserManager.DeleteAsync(usuario.UsuarioIdentity);
+
+            if (result.Succeeded)
+            {
+                Mensaje = $"Usuario {usuario.NombreCompleto} eliminado exitosamente";
+                await CargarUsuarios();
+            }
+            else
+            {
+                Mensaje = $"Error al eliminar usuario: {string.Join(", ", result.Errors.Select(e => e.Description))}";
+            }
+        }
+        catch (Exception ex)
+        {
+            Mensaje = $"Error al eliminar usuario: {ex.Message}";
+        }
+    }
+
+    private string GetRolBadgeClass(string rol)
+    {
+        return rol switch
+        {
+            "Admin" => "bg-danger",
+            "Tecnico" => "bg-primary",
+            "Cajero" => "bg-success",
+            _ => "bg-secondary"
+        };
+    }
+
+    public class UsuarioSimple
+    {
+        public string Id { get; set; } = string.Empty;
+        public string NombreCompleto { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Rol { get; set; } = string.Empty;
+        public ApplicationUser UsuarioIdentity { get; set; } = null!;
+    }
+}
