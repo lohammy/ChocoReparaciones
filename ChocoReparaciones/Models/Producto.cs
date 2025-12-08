@@ -9,7 +9,6 @@ namespace ChocoReparaciones.Models
 
 		[Required(ErrorMessage = "El nombre del producto es obligatorio.")]
 		[StringLength(100, ErrorMessage = "El nombre no puede superar los 100 caracteres.")]
-		[RegularExpression(@"^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$", ErrorMessage = "En este campo solo se permiten letras.")]
 		public string? Nombre { get; set; }
 
 		[Required(ErrorMessage = "La descripción es obligatoria.")]
