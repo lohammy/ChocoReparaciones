@@ -1,7 +1,9 @@
 ﻿@page "/ChocoReparaciones/Reparaciones/crear"
 @page "/ChocoReparaciones/Reparaciones/editar/{Id:int}"
+@attribute [Authorize(Roles = "Admin,Tecnico, Cajero")]
 @using ChocoReparaciones.Models
 @using ChocoReparaciones.Services
+@using Microsoft.AspNetCore.Authorization
 @inject ReparacionServices reparacionServices
 @inject NavigationManager navigationManager
 @rendermode InteractiveServer

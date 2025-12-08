@@ -10,117 +10,154 @@
 <PageTitle>Inventario de Repuestos</PageTitle>
 
 <div class="container">
-	<div class="card shadow-lg">
-		<div class="card-header space-between">
-			<h5 class="card-title">Inventario de Repuestos</h5>
-			<a href="/ChocoReparaciones/NuevoProducto/crear" class="btn btn-primary">
-				<span class="bi bi-plus-square"></span> Crear
-			</a>
-		</div>
+    <div class="card shadow-lg">
+        <div class="card-header space-between">
+            <h5 class="card-title">Inventario de Repuestos</h5>
+            <a href="/ChocoReparaciones/NuevoProducto/crear" class="btn btn-primary">
+                <span class="bi bi-plus-square"></span> Crear
+            </a>
+        </div>
 
-		<div class="card-body">
-			@*labels*@
-			<div class="row">
-				@*Filtrar por*@
-				<div class="col-3">
-					<label class="col-form-label"><strong>Filtrar por</strong></label>
-				</div>
-				@*ValorFiltro*@
-				<div class="col-4">
-					<label class="col-form-label"><strong>B&uacute;squeda</strong></label>
-				</div>
-			</div>
+        <div class="card-body">
+            <div class="filters-section">
+                <div class="row align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label"><strong>Filtrar por</strong></label>
+                        <InputSelect class="form-select" @bind-Value="Filtro">
+                            <option value="" selected disabled>Elija una opción</option>
+                            <option value="Nombre">Nombre</option>
+                            <option value="Categoria">Categoría</option>
+                        </InputSelect>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label"><strong>Búsqueda</strong></label>
+                        <div class="input-group">
+                            <input class="form-control" @bind="ValorFiltro" placeholder="Buscar producto..." />
+                            <button type="button" class="btn btn-outline-primary" @onclick="Buscar">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-outline-secondary" @onclick="Restablecer">
+                            <i class="bi bi-arrow-clockwise"></i> 
+                        </button>
+                    </div>
+                </div>
+            </div>
 
-			@*Inputs y botones*@
-			<div class="row align-items-center">
-				@*filtro*@
-				<div class="col-3">
-					<InputSelect class="form-select" @bind-Value="Filtro">
-						<option value="" selected disabled>Elija una opci&oacute;n</option>
-						<option value="Nombre">Nombre</option>
-						<option value="Categoria">Categoría</option>
-					</InputSelect>
-				</div>
+            <div class="products-grid">
+                @if (ListaProductos.Any())
+                {
+                    @foreach (var producto in ListaProductos)
+                    {
+                        <div class="product-card">
+                            <div class="product-header">
+                                <h6 class="product-title">@producto.Nombre</h6>
+                                <span class="product-category">@producto.Categoria</span>
+                            </div>
 
-				@*Busqueda*@
-				<div class="col-4">
-					<div class="input-group">
-						<input class="form-control" @bind="ValorFiltro" placeholder="Buscar" />
-						<button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
-					</div>
-				</div>
-			</div>
+                            <div class="product-details">
+                                <div class="detail-row">
+                                    <strong>Stock:</strong>
+                                    <span class="stock-badge @GetStockClass(producto.CantidadDisponible)">
+                                        @producto.CantidadDisponible unidades
+                                    </span>
+                                </div>
+                                <div class="detail-row">
+                                    <strong>ID:</strong>
+                                    <span class="product-code">@producto.Id</span>
+                                </div>
+                                <div class="detail-row">
+                                    <strong>Precio:</strong>
+                                    <span class="product-price">@producto.Precio.ToString("C")</span>
+                                </div>
+                                @if (!string.IsNullOrEmpty(producto.Descripcion))
+                                {
+                                    <div class="detail-row description">
+                                        <small class="text-muted">@producto.Descripcion</small>
+                                    </div>
+                                }
+                            </div>
 
-			<table class="table table-hover">
-				<thead class="table table-striped">
-					<tr>
-						<th>Id</th>
-						<th>Nombre</th>
-						<th>Descripción</th>
-						<th>Categoría</th>
-						<th>Stock</th>
-						<th>Precio</th>
-						<th>Opciones</th>
-					</tr>
-				</thead>
-				<tbody>
-					@foreach (var producto in ListaProductos)
-					{
-						<tr>
-							<td>@producto.Id</td>
-							<td>@producto.Nombre</td>
-							<td>@producto.Descripcion</td>
-							<td>@producto.Categoria</td>
-							<td>@producto.CantidadDisponible</td>
-							<td>@producto.Precio.ToString("C")</td>
-							<td class="text-center">
-								<a href="/ChocoReparaciones/NuevoProducto/editar/@producto.Id" class="btn btn-secondary bi bi-pencil-square"> Editar</a>
-							</td>
-						</tr>
-					}
-				</tbody>
-			</table>
-		</div>
+                            <div class="product-actions">
+                                <a href="/ChocoReparaciones/NuevoProducto/editar/@producto.Id" class="btn btn-edit">
+                                    <i class="bi bi-pencil-square"></i> Editar
+                                </a>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="bi bi-box-seam"></i>
+                        </div>
+                        <h5>No hay productos</h5>
+                        <p class="text-muted">No se encontraron productos que coincidan con los criterios de búsqueda.</p>
+                        <button class="btn btn-primary" @onclick="Restablecer">
+                            <i class="bi bi-arrow-clockwise"></i> Mostrar todos
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
 
-		<div class="card-footer space-between">
-			<label>Cantidad: @ListaProductos.Count()</label>
-		</div>
-	</div>
+        <div class="card-footer">
+            <div class="footer-stats">
+                <span><strong>Total de productos:</strong> @ListaProductos.Count()</span>
+                <span><strong>En stock:</strong> @ListaProductos.Count(p => p.CantidadDisponible > 0)</span>
+                <span><strong>Sin stock:</strong> @ListaProductos.Count(p => p.CantidadDisponible == 0)</span>
+            </div>
+        </div>
+    </div>
 </div>
 
 @code {
-	public List<Producto> ListaProductos { get; set; } = new List<Producto>();
-	public string Filtro { get; set; } = string.Empty;
-	public string ValorFiltro { get; set; } = string.Empty;
+    public List<Producto> ListaProductos { get; set; } = new List<Producto>();
+    public string Filtro { get; set; } = string.Empty;
+    public string ValorFiltro { get; set; } = string.Empty;
 
-	protected override async Task OnInitializedAsync()
-	{
-		ListaProductos = await ProductoServices.ListarProductos();
-	}
+    protected override async Task OnInitializedAsync()
+    {
+        ListaProductos = await ProductoServices.ListarProductos();
+    }
 
-	private async Task Buscar()
-	{
-		if (ValorFiltro.Trim() != "")
-		{
-			if (Filtro == "Nombre")
-			{
-				ListaProductos = await ProductoServices.Listar(p => p.Nombre.ToLower().Contains(ValorFiltro.ToLower()));
-			}
-			else if (Filtro == "Categoria")
-			{
-				ListaProductos = await ProductoServices.Listar(p => p.Categoria.ToLower().Contains(ValorFiltro.ToLower()));
-			}
-		}
-		else
-		{
-			ListaProductos = await ProductoServices.ListarProductos();
-		}
-	}
+    private async Task Buscar()
+    {
+        if (!string.IsNullOrWhiteSpace(ValorFiltro))
+        {
+            if (Filtro == "Nombre")
+            {
+                ListaProductos = await ProductoServices.Listar(p => p.Nombre.ToLower().Contains(ValorFiltro.ToLower()));
+            }
+            else if (Filtro == "Categoria")
+            {
+                ListaProductos = await ProductoServices.Listar(p => p.Categoria.ToLower().Contains(ValorFiltro.ToLower()));
+            }
+        }
+        else
+        {
+            ListaProductos = await ProductoServices.ListarProductos();
+        }
+    }
 
-	private async Task Restablecer()
-	{
-		ListaProductos = await ProductoServices.ListarProductos();
-		Filtro = string.Empty;
-		ValorFiltro = string.Empty;
-	}
+    private async Task Restablecer()
+    {
+        ListaProductos = await ProductoServices.ListarProductos();
+        Filtro = string.Empty;
+        ValorFiltro = string.Empty;
+    }
+
+    private string GetStockClass(int stock)
+    {
+        return stock switch
+        {
+            0 => "stock-empty",
+            <= 5 => "stock-low",
+            <= 15 => "stock-medium",
+            _ => "stock-high"
+        };
+    }
 }
