@@ -2,7 +2,8 @@
     border: none;
     border-radius: 15px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
+    overflow: visible;
+    margin-top: 3rem;
 }
 
 .card-header {
@@ -10,6 +11,16 @@
     color: white;
     border-bottom: none;
     padding: 1.5rem;
+    position: relative;
+    z-index: 2;
+    transform: translateY(-50%);
+    margin-bottom: -1rem;
+    border-radius: 15px 15px 0 0;
+    box-shadow: 0 5px 15px rgba(230, 165, 2, 0.2);
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: left;
 }
 
 .card-title {
@@ -17,16 +28,21 @@
     margin: 0;
     font-size: 1.25rem;
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    text-align: left;
 }
 
 .card-body {
-    padding: 2rem;
+    padding: 3rem 2rem 2rem 2rem;
+    position: relative;
+    z-index: 1;
 }
 
 .card-footer {
     background: #f8f9fa;
     border-top: 1px solid #e0e0e0;
     padding: 1.5rem;
+    position: relative;
+    z-index: 1;
 }
 
 .form-label {
@@ -57,6 +73,7 @@
         background: #e9ecef;
         color: #6c757d;
     }
+
 .btn-primary {
     background: #E6A502;
     border-color: #E6A502;
@@ -84,14 +101,37 @@
     font-weight: 500;
 }
 
+.text-center {
+    text-align: center !important;
+}
+
+.col-1 {
+    margin-bottom: 1.5rem;
+}
+
+.validation-message {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
+}
 
 @media (max-width: 768px) {
     .container {
         padding: 0 15px;
     }
 
+    .card {
+        margin-top: 2rem;
+    }
+
+    .card-header {
+        width: 90%;
+        transform: translateY(-40%);
+    }
+
     .card-body {
-        padding: 1.5rem;
+        padding: 2.5rem 1.5rem 1.5rem 1.5rem;
     }
 
     .card-footer {
@@ -111,11 +151,18 @@
 
 @media (max-width: 576px) {
     .card {
-        margin: 0.5rem 0;
+        margin: 1rem 0;
+        margin-top: 1.5rem;
+    }
+
+    .card-header {
+        width: 95%;
+        transform: translateY(-30%);
+        padding: 1rem;
     }
 
     .card-body {
-        padding: 1rem;
+        padding: 2rem 1rem 1rem 1rem;
     }
 
     .card-footer {
@@ -125,12 +172,4 @@
     .card-title {
         font-size: 1.1rem;
     }
-}
-
-.text-center {
-    text-align: center !important;
-}
-
-.col-1 {
-    margin-bottom: 1.5rem;
 }

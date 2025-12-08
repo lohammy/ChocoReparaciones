@@ -22,14 +22,12 @@
 
             <div class="card-body">
 
-                <!-- Nombre -->
                 <div class="mb-3">
                     <label class="form-label">Nombre</label>
                     <InputText class="form-control" @bind-Value="producto.Nombre"></InputText>
                     <ValidationMessage For="(() => producto.Nombre)" />
                 </div>
 
-                <!-- Categoría -->
                 <div class="mb-3">
                     <label class="form-label">Categoría</label>
                     <InputSelect class="form-control" @bind-Value="producto.Categoria">
@@ -42,21 +40,18 @@
                     <ValidationMessage For="(() => producto.Categoria)" />
                 </div>
 
-                <!-- Descripción -->
                 <div class="mb-3">
                     <label class="form-label">Descripción</label>
                     <InputTextArea class="form-control" @bind-Value="producto.Descripcion" rows="3"></InputTextArea>
                     <ValidationMessage For="(() => producto.Descripcion)" />
                 </div>
 
-                <!-- Precio -->
                 <div class="mb-3">
                     <label class="form-label">Precio</label>
                     <InputNumber class="form-control" @bind-Value="producto.Precio" step="0.01"></InputNumber>
                     <ValidationMessage For="(() => producto.Precio)" />
                 </div>
 
-                <!-- Cantidad -->
                 <div class="mb-3">
                     <label class="form-label">Cantidad Disponible</label>
                     <InputNumber class="form-control" @bind-Value="producto.CantidadDisponible"></InputNumber>
@@ -65,7 +60,6 @@
 
             </div>
 
-            <!-- Footer -->
             <div class="card-footer text-center mt-2">
                 <a href="/ChocoReparaciones/Inventario" class="btn btn-secondary">
                     <span class="bi bi-arrow-left"></span> Volver

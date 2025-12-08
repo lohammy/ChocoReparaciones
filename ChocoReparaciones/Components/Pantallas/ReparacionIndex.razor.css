@@ -1,13 +1,9 @@
-﻿/* ============================================================================= */
-/* REPARACIONES INDEX - CSS CON TEMA DORADO CHOCO REPARACIONES                  */
-/* ============================================================================= */
-
-/* === CARD PRINCIPAL === */
-.card {
+﻿.card {
 	border: none;
 	border-radius: 15px;
 	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-	overflow: hidden;
+	overflow: visible;
+	margin-top: 3rem;
 }
 
 .card-header {
@@ -15,6 +11,16 @@
 	color: white;
 	border-bottom: none;
 	padding: 1.5rem;
+	position: relative;
+	z-index: 2;
+	transform: translateY(-50%);
+	margin-bottom: -1rem;
+	border-radius: 15px 15px 0 0;
+	box-shadow: 0 5px 15px rgba(230, 165, 2, 0.2);
+	width: 80%;
+	margin-left: auto;
+	margin-right: auto;
+	text-align: left;
 }
 
 .card-title {
@@ -22,10 +28,13 @@
 	margin: 0;
 	font-size: 1.25rem;
 	text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+	text-align: left;
 }
 
 .card-body {
-	padding: 2rem;
+	padding: 3rem 2rem 2rem 2rem;
+	position: relative;
+	z-index: 1;
 }
 
 .card-footer {
@@ -34,9 +43,10 @@
 	padding: 1.5rem;
 	font-weight: 600;
 	color: #495057;
+	position: relative;
+	z-index: 1;
 }
 
-/* === FILTROS Y BÚSQUEDA === */
 .form-select,
 .form-control {
 	padding: 0.75rem;
@@ -58,7 +68,6 @@
 	color: #323538;
 }
 
-/* === BOTONES === */
 .btn-primary {
 	background: #E6A502;
 	border-color: #E6A502;
@@ -88,7 +97,6 @@
 		color: white;
 	}
 
-/* === TABLA === */
 .table {
 	border-radius: 8px;
 	overflow: hidden;
@@ -104,7 +112,6 @@
 		padding: 1rem 0.75rem;
 		font-size: 0.95rem;
 		letter-spacing: 0.3px;
-		/* ⭐ MAYÚSCULAS ELIMINADAS - No más text-transform: uppercase */
 	}
 
 	.table tbody tr {
@@ -124,17 +131,14 @@
 		font-size: 0.9rem;
 	}
 
-/* === BADGES DE ESTADO Y PRIORIDAD === */
 .badge {
 	padding: 0.5rem 0.8rem;
 	border-radius: 6px;
 	font-size: 0.8rem;
 	font-weight: 600;
-	/* ⭐ MAYÚSCULAS ELIMINADAS - No más text-transform: uppercase */
 	letter-spacing: 0.3px;
 }
 
-	/* Estados */
 	.badge.bg-warning {
 		background-color: #ffc107 !important;
 		color: #212529 !important;
@@ -152,7 +156,6 @@
 		background-color: #6c757d !important;
 	}
 
-	/* Prioridades */
 	.badge.bg-danger {
 		background-color: #dc3545 !important;
 	}
@@ -161,7 +164,6 @@
 		background-color: #212529 !important;
 	}
 
-/* === INPUT GROUP === */
 .input-group {
 	border-radius: 8px;
 	overflow: hidden;
@@ -185,7 +187,6 @@
 			color: white;
 		}
 
-/* === ICONOS === */
 .bi {
 	font-size: 1rem;
 	margin-right: 0.5rem;
@@ -199,125 +200,6 @@
 	margin-right: 0;
 }
 
-/* === RESPONSIVE === */
-@media (max-width: 768px) {
-	.container {
-		padding: 0 15px;
-	}
-
-	.card-body {
-		padding: 1.5rem;
-	}
-
-	.card-header {
-		padding: 1.25rem;
-	}
-
-	.card-footer {
-		padding: 1.25rem;
-	}
-
-	/* Tabla responsive */
-	.table {
-		font-size: 0.8rem;
-	}
-
-		.table thead th,
-		.table tbody td {
-			padding: 0.5rem 0.25rem;
-		}
-
-		/* Ocultar columnas menos importantes en móvil */
-		.table th:nth-child(7),
-		.table td:nth-child(7),
-		.table th:nth-child(8),
-		.table td:nth-child(8) {
-			display: none;
-		}
-
-	/* Filtros en columnas completas */
-	.col-3,
-	.col-4.offset-5 {
-		flex: 0 0 100%;
-		max-width: 100%;
-		margin-bottom: 1rem;
-	}
-
-	.offset-5 {
-		margin-left: 0 !important;
-	}
-}
-
-@media (max-width: 576px) {
-	.card {
-		margin: 0.5rem 0;
-	}
-
-	.card-body {
-		padding: 1rem;
-	}
-
-	.card-header {
-		padding: 1rem;
-		flex-direction: column;
-		gap: 1rem;
-	}
-
-		.card-header .card-title {
-			order: 1;
-		}
-
-		.card-header .btn {
-			order: 2;
-			width: 100%;
-		}
-
-	.card-title {
-		font-size: 1.1rem;
-	}
-
-	/* Ocultar más columnas en móviles pequeños */
-	.table th:nth-child(4),
-	.table td:nth-child(4),
-	.table th:nth-child(6),
-	.table td:nth-child(6) {
-		display: none;
-	}
-
-	.badge {
-		font-size: 0.7rem;
-		padding: 0.3rem 0.5rem;
-	}
-}
-
-/* === ESTADOS HOVER MEJORADOS === */
-.btn:focus {
-	outline: 2px solid #E6A502;
-	outline-offset: 2px;
-}
-
-.form-control:focus,
-.form-select:focus {
-	outline: none;
-}
-
-/* === ANIMACIONES SUTILES === */
-.btn,
-.form-control,
-.form-select {
-	transition: all 0.2s ease;
-}
-
-.card {
-	transition: transform 0.2s ease;
-}
-
-	.card:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-	}
-
-/* === UTILITIES === */
 .text-center {
 	text-align: center !important;
 }
@@ -334,7 +216,6 @@
 	align-items: center !important;
 }
 
-/* === MEJORAS VISUALES === */
 .table-striped tbody tr:nth-of-type(odd) {
 	background-color: rgba(0, 0, 0, 0.02);
 }
@@ -343,23 +224,6 @@
 	background-color: rgba(230, 165, 2, 0.08) !important;
 }
 
-/* === ACCESIBILIDAD === */
-.btn[title]:hover::after {
-	content: attr(title);
-	position: absolute;
-	bottom: -30px;
-	left: 50%;
-	transform: translateX(-50%);
-	background: #333;
-	color: white;
-	padding: 0.25rem 0.5rem;
-	border-radius: 4px;
-	font-size: 0.8rem;
-	white-space: nowrap;
-	z-index: 1000;
-}
-
-/* === MEJORAS ADICIONALES PARA EL INDEX === */
 .table-hover tbody tr {
 	cursor: pointer;
 }
@@ -368,7 +232,6 @@
 	white-space: nowrap;
 }
 
-/* === ESTILOS PARA FILTROS === */
 .row.align-items-center {
 	margin-bottom: 1.5rem;
 }
@@ -379,7 +242,119 @@
 		display: block;
 	}
 
-/* === OPTIMIZACIÓN MÓVIL === */
+.btn,
+.form-control,
+.form-select {
+	transition: all 0.2s ease;
+}
+
+	.btn:focus {
+		outline: 2px solid #E6A502;
+		outline-offset: 2px;
+	}
+
+	.form-control:focus,
+	.form-select:focus {
+		outline: none;
+	}
+
+@media (max-width: 768px) {
+	.container {
+		padding: 0 15px;
+	}
+
+	.card {
+		margin-top: 2rem;
+	}
+
+	.card-header {
+		width: 90%;
+		transform: translateY(-40%);
+		flex-direction: column;
+		gap: 1rem;
+		text-align: center;
+	}
+
+	.card-body {
+		padding: 2.5rem 1.5rem 1.5rem 1.5rem;
+	}
+
+	.card-footer {
+		padding: 1.25rem;
+	}
+
+	.table {
+		font-size: 0.8rem;
+	}
+
+		.table thead th,
+		.table tbody td {
+			padding: 0.5rem 0.25rem;
+		}
+
+		.table th:nth-child(7),
+		.table td:nth-child(7),
+		.table th:nth-child(8),
+		.table td:nth-child(8) {
+			display: none;
+		}
+
+	.col-3,
+	.col-4.offset-5 {
+		flex: 0 0 100%;
+		max-width: 100%;
+		margin-bottom: 1rem;
+	}
+
+	.offset-5 {
+		margin-left: 0 !important;
+	}
+}
+
+@media (max-width: 576px) {
+	.card {
+		margin: 1rem 0;
+		margin-top: 1.5rem;
+	}
+
+	.card-header {
+		width: 95%;
+		transform: translateY(-30%);
+		padding: 1rem;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+		.card-header .card-title {
+			order: 1;
+		}
+
+		.card-header .btn {
+			order: 2;
+			width: 100%;
+		}
+
+	.card-body {
+		padding: 2rem 1rem 1rem 1rem;
+	}
+
+	.card-title {
+		font-size: 1.1rem;
+	}
+
+	.table th:nth-child(4),
+	.table td:nth-child(4),
+	.table th:nth-child(6),
+	.table td:nth-child(6) {
+		display: none;
+	}
+
+	.badge {
+		font-size: 0.7rem;
+		padding: 0.3rem 0.5rem;
+	}
+}
+
 @media (max-width: 480px) {
 	.table thead {
 		font-size: 0.7rem;

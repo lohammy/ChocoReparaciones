@@ -1,13 +1,9 @@
-﻿/* ============================================================================= */
-/* REPARACION CREATE/EDIT - CSS BASADO EN PRODUCTOS + ESTILOS DE DETALLES      */
-/* ============================================================================= */
-
-/* === ESTILOS BASE (del CSS de productos) === */
-.card {
+﻿.card {
 	border: none;
 	border-radius: 15px;
 	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-	overflow: hidden;
+	overflow: visible;
+	margin-top: 3rem;
 }
 
 .card-header {
@@ -15,6 +11,16 @@
 	color: white;
 	border-bottom: none;
 	padding: 1.5rem;
+	position: relative;
+	z-index: 2;
+	transform: translateY(-50%);
+	margin-bottom: -1rem;
+	border-radius: 15px 15px 0 0;
+	box-shadow: 0 5px 15px rgba(230, 165, 2, 0.2);
+	width: 80%;
+	margin-left: auto;
+	margin-right: auto;
+	text-align: left;
 }
 
 .card-title {
@@ -22,19 +28,23 @@
 	margin: 0;
 	font-size: 1.25rem;
 	text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+	text-align: left;
 }
 
 .card-body {
-	padding: 2rem;
+	padding: 3rem 2rem 2rem 2rem;
+	position: relative;
+	z-index: 1;
 }
 
 .card-footer {
 	background: #f8f9fa;
 	border-top: 1px solid #e0e0e0;
 	padding: 1.5rem;
+	position: relative;
+	z-index: 1;
 }
 
-/* === FORM CONTROLS === */
 .form-label {
 	font-weight: 600;
 	color: #323538;
@@ -78,7 +88,6 @@
 		box-shadow: 0 0 0 3px rgba(230, 165, 2, 0.1);
 	}
 
-/* === BUTTONS === */
 .btn-primary {
 	background: #E6A502;
 	border-color: #E6A502;
@@ -119,13 +128,19 @@
 		border-color: #218838;
 	}
 
-.btn-outline-danger {
-	border-radius: 6px;
+.btn-outline-success {
+	border: 2px solid #28a745;
+	color: #28a745;
+	border-radius: 8px;
 	padding: 0.5rem 1rem;
-	font-size: 0.9rem;
 }
 
-/* === SECCIÓN DE DETALLES DE PRODUCTOS === */
+	.btn-outline-success:hover {
+		background: #28a745;
+		border-color: #28a745;
+		color: white;
+	}
+
 .border-success {
 	border: 2px solid #28a745 !important;
 	border-radius: 12px;
@@ -140,7 +155,33 @@
 		border-bottom: 2px solid rgba(40, 167, 69, 0.2);
 	}
 
-/* === TABLA DE DETALLES === */
+.input-group {
+	border-radius: 8px;
+	overflow: hidden;
+}
+
+	.input-group .form-control,
+	.input-group .form-select {
+		border-radius: 0;
+	}
+
+		.input-group .form-control:first-child,
+		.input-group .form-select:first-child {
+			border-radius: 8px 0 0 8px;
+		}
+
+	.input-group .btn:last-child {
+		border-radius: 0 8px 8px 0;
+	}
+
+	.input-group .input-group-text {
+		background: #e9ecef;
+		border: 2px solid #dde2e6;
+		border-left: none;
+		border-right: none;
+		font-weight: 500;
+	}
+
 .table {
 	border-radius: 8px;
 	overflow: hidden;
@@ -170,15 +211,6 @@
 		border-top: 1px solid #e9ecef;
 	}
 
-.table-bordered {
-	border: 1px solid #dee2e6;
-}
-
-.table-striped tbody tr:nth-of-type(odd) {
-	background-color: rgba(0, 0, 0, 0.02);
-}
-
-/* === ALERTAS === */
 .alert {
 	border: none;
 	border-radius: 8px;
@@ -191,41 +223,12 @@
 	border-left: 4px solid #dc3545;
 }
 
-/* === CONTROLES DE PRODUCTOS === */
-.align-self-end {
-	display: flex;
-	align-items: flex-end;
+.alert-warning {
+	background: rgba(255, 193, 7, 0.1);
+	color: #856404;
+	border-left: 4px solid #ffc107;
 }
 
-.float-end {
-	float: right !important;
-	margin-top: 1rem;
-	font-size: 1rem;
-	color: #495057;
-}
-
-/* === SPACING === */
-.mb-3 {
-	margin-bottom: 1.5rem !important;
-}
-
-.mt-3 {
-	margin-top: 1.5rem !important;
-}
-
-.p-3 {
-	padding: 1.5rem !important;
-}
-
-/* === VALIDATION === */
-.validation-message {
-	color: #dc3545;
-	font-size: 0.875rem;
-	margin-top: 0.25rem;
-	display: block;
-}
-
-/* === UTILITIES === */
 .text-center {
 	text-align: center !important;
 }
@@ -238,14 +241,45 @@
 	color: #6c757d !important;
 }
 
-/* === RESPONSIVE === */
+.mb-3 {
+	margin-bottom: 1.5rem !important;
+}
+
+.mt-2 {
+	margin-top: 1rem !important;
+}
+
+.mt-3 {
+	margin-top: 1.5rem !important;
+}
+
+.p-3 {
+	padding: 1.5rem !important;
+}
+
+.validation-message {
+	color: #dc3545;
+	font-size: 0.875rem;
+	margin-top: 0.25rem;
+	display: block;
+}
+
 @media (max-width: 768px) {
 	.container {
 		padding: 0 15px;
 	}
 
+	.card {
+		margin-top: 2rem;
+	}
+
+	.card-header {
+		width: 90%;
+		transform: translateY(-40%);
+	}
+
 	.card-body {
-		padding: 1.5rem;
+		padding: 2.5rem 1.5rem 1.5rem 1.5rem;
 	}
 
 	.card-footer {
@@ -262,7 +296,6 @@
 		margin: 0.25rem;
 	}
 
-	/* Tabla responsive */
 	.table {
 		font-size: 0.9rem;
 	}
@@ -272,31 +305,34 @@
 			padding: 0.5rem 0.25rem;
 		}
 
-	/* Controles de productos en móvil */
-	.row .col-4,
-	.row .col-3,
-	.row .col-2 {
-		margin-bottom: 1rem;
+	.input-group {
+		flex-direction: column;
+		gap: 0.5rem;
 	}
 
-	.align-self-end {
-		align-items: stretch;
-	}
-
-	.float-end {
-		float: none !important;
-		text-align: center;
-		margin-top: 0.5rem;
-	}
+		.input-group .form-control,
+		.input-group .form-select,
+		.input-group .btn,
+		.input-group .input-group-text {
+			border-radius: 8px !important;
+			border: 2px solid #dde2e6 !important;
+		}
 }
 
 @media (max-width: 576px) {
 	.card {
-		margin: 0.5rem 0;
+		margin: 1rem 0;
+		margin-top: 1.5rem;
+	}
+
+	.card-header {
+		width: 95%;
+		transform: translateY(-30%);
+		padding: 1rem;
 	}
 
 	.card-body {
-		padding: 1rem;
+		padding: 2rem 1rem 1rem 1rem;
 	}
 
 	.card-footer {
@@ -307,7 +343,6 @@
 		font-size: 1.1rem;
 	}
 
-	/* Sección de detalles más compacta */
 	.border-success {
 		padding: 1rem !important;
 	}
@@ -316,7 +351,6 @@
 			font-size: 1.1rem;
 		}
 
-	/* Tabla más compacta */
 	.table {
 		font-size: 0.8rem;
 	}
@@ -325,38 +359,4 @@
 		.table tbody td {
 			padding: 0.5rem 0.2rem;
 		}
-
-	/* Botones más pequeños en móvil */
-	.btn-sm {
-		padding: 0.375rem 0.75rem;
-		font-size: 0.8rem;
-	}
-
-	/* Controles en columnas completas en móvil */
-	.row .col-4,
-	.row .col-3,
-	.row .col-2 {
-		flex: 0 0 100%;
-		max-width: 100%;
-	}
-}
-
-/* === MEJORAS DE ACCESIBILIDAD === */
-.btn:focus {
-	outline: 2px solid #E6A502;
-	outline-offset: 2px;
-}
-
-.form-control:focus,
-.form-select:focus {
-	outline: none;
-}
-
-/* === TOTAL READONLY INPUT === */
-.form-control.bg-light.text-secondary[readonly] {
-	background: #e9ecef !important;
-	border-color: #ced4da;
-	font-weight: 600;
-	color: #495057 !important;
-	font-size: 1.1rem;
 }

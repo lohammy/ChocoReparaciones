@@ -1,7 +1,9 @@
 ﻿@page "/ChocoReparaciones/Reparaciones"
+@attribute [Authorize(Roles = "Admin,Tecnico, Cajero")]
 @using System.Globalization;
 @using ChocoReparaciones.Models
 @using ChocoReparaciones.Services
+@using Microsoft.AspNetCore.Authorization
 @inject NavigationManager navigationManager
 @inject ReparacionServices reparacionServices
 @rendermode InteractiveServer
@@ -9,160 +11,159 @@
 <PageTitle>Index de Reparaciones</PageTitle>
 
 <div class="container">
-    <div class="card shadow-lg">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <div class="card-title"></div>
-            <h5 class="card-title">Gestión de Reparaciones</h5>
-            <a href="/ChocoReparaciones/Reparaciones/crear" class="btn btn-primary">
-                <span class="bi bi-plus-square"></span> Crear
-            </a>
-        </div>
+	<div class="card shadow-lg">
+		<div class="card-header d-flex justify-content-between align-items-center">
+			<h5 class="card-title">Gestión de Reparaciones</h5>
+			<a href="/ChocoReparaciones/Reparaciones/crear" class="btn btn-primary">
+				<span class="bi bi-plus-square"></span> Crear
+			</a>
+		</div>
 
-        <div class="card-body">
-            <div class="row">
-                <div class="col-3">
-                    <label class="col-form-label"><strong>Filtrar por</strong></label>
-                </div>
-                <div class="col-4 offset-5">
-                    <label class="col-form-label"><strong>Búsqueda</strong></label>
-                </div>
+		<div class="card-body">
+			<div class="row">
+				<div class="col-3">
+					<label class="col-form-label"><strong>Filtrar por</strong></label>
+				</div>
+				<div class="col-4 offset-5">
+					<label class="col-form-label"><strong>Búsqueda</strong></label>
+				</div>
 
-                <div class="row align-items-center">
-                    <div class="col-3">
-                        <InputSelect class="form-select" @bind-Value="Filtro">
-                            <option value="" selected disabled>Selecciona una opción</option>
-                            <option value="ReparacionId">Reparación ID</option>
-                            <option value="ClienteNombre">Nombre del Cliente</option>
-                            <option value="Estado">Estado</option>
-                            <option value="DescripcionEquipo">Equipo</option>
-                        </InputSelect>
-                    </div>
-                    <div class="col-4 offset-5">
-                        <div class="input-group">
-                            <input class="form-control" @bind="ValorFiltro" placeholder="Buscar" />
-                            <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
-                        </div>
-                    </div>
-                </div>
+				<div class="row align-items-center">
+					<div class="col-3">
+						<InputSelect class="form-select" @bind-Value="Filtro">
+							<option value="" selected disabled>Selecciona una opción</option>
+							<option value="ReparacionId">Reparación ID</option>
+							<option value="ClienteNombre">Nombre del Cliente</option>
+							<option value="Estado">Estado</option>
+							<option value="DescripcionEquipo">Equipo</option>
+						</InputSelect>
+					</div>
+					<div class="col-4 offset-5">
+						<div class="input-group">
+							<input class="form-control" @bind="ValorFiltro" placeholder="Buscar" />
+							<button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
+						</div>
+					</div>
+				</div>
 
-                <table class="table table-hover">
-                    <thead class="table table-striped text-black">
-                        <tr>
-                            <th>ID</th>
-                            <th>Fecha Ingreso</th>
-                            <th>Cliente</th>
-                            <th>Equipo</th>
-                            <th>Estado</th>
-                            <th>Prioridad</th>
-                            <th>Productos Usados</th>
-                            <th>Total Productos</th>
-                            <th>Opciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var reparacion in ListaReparaciones)
-                        {
-                            <tr>
-                                <td>@reparacion.Id</td>
-                                <td>@reparacion.FechaIngreso.ToString("dd/MM/yyyy")</td>
-                                <td>@reparacion.ClienteNombre</td>
-                                <td>@reparacion.DescripcionEquipo</td>
-                                <td>
-                                    <span class="badge @GetEstadoBadgeClass(reparacion.Estado)">
-                                        @reparacion.Estado
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="badge @GetPrioridadBadgeClass(reparacion.Prioridad)">
-                                        @reparacion.Prioridad
-                                    </span>
-                                </td>
-                                <td>@reparacion.ReparacionDetalles.Sum(d => d.Cantidad)</td>
-                                <td>@reparacion.ReparacionDetalles.Sum(d => d.Cantidad * d.Precio).ToString("C")</td>
-                                <td class="text-center">
-                                    <a href="/ChocoReparaciones/Reparaciones/editar/@reparacion.Id"
-                                       class="btn btn-outline-primary bi bi-pencil-square"
-                                       title="Editar">
-                                    </a>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+				<table class="table table-hover">
+					<thead class="table table-striped text-black">
+						<tr>
+							<th>ID</th>
+							<th>Fecha Ingreso</th>
+							<th>Cliente</th>
+							<th>Equipo</th>
+							<th>Estado</th>
+							<th>Prioridad</th>
+							<th>Productos Usados</th>
+							<th>Total Productos</th>
+							<th>Opciones</th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var reparacion in ListaReparaciones)
+						{
+							<tr>
+								<td>@reparacion.Id</td>
+								<td>@reparacion.FechaIngreso.ToString("dd/MM/yyyy")</td>
+								<td>@reparacion.ClienteNombre</td>
+								<td>@reparacion.DescripcionEquipo</td>
+								<td>
+									<span class="badge @GetEstadoBadgeClass(reparacion.Estado)">
+										@reparacion.Estado
+									</span>
+								</td>
+								<td>
+									<span class="badge @GetPrioridadBadgeClass(reparacion.Prioridad)">
+										@reparacion.Prioridad
+									</span>
+								</td>
+								<td>@reparacion.ReparacionDetalles.Sum(d => d.Cantidad)</td>
+								<td>@reparacion.ReparacionDetalles.Sum(d => d.Cantidad * d.Precio).ToString("C")</td>
+								<td class="text-center">
+									<a href="/ChocoReparaciones/Reparaciones/editar/@reparacion.Id"
+									   class="btn btn-outline-primary bi bi-pencil-square"
+									   title="Editar">
+									</a>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
 
-            <div class="card-footer">
-                <label>Total de reparaciones: @ListaReparaciones.Count()</label>
-            </div>
-        </div>
-    </div>
+			<div class="card-footer">
+				<label>Total de reparaciones: @ListaReparaciones.Count()</label>
+			</div>
+		</div>
+	</div>
 </div>
 
 @code {
-    public List<Reparacion> ListaReparaciones { get; set; } = new List<Reparacion>();
-    public string Filtro { get; set; } = string.Empty;
-    public string ValorFiltro { get; set; } = string.Empty;
+	public List<Reparacion> ListaReparaciones { get; set; } = new List<Reparacion>();
+	public string Filtro { get; set; } = string.Empty;
+	public string ValorFiltro { get; set; } = string.Empty;
 
-    protected override async Task OnInitializedAsync()
-    {
-        ListaReparaciones = await reparacionServices.Listar(r => r.Id > 0);
-    }
+	protected override async Task OnInitializedAsync()
+	{
+		ListaReparaciones = await reparacionServices.Listar(r => r.Id > 0);
+	}
 
-    private async Task Buscar()
-    {
-        if (ValorFiltro.Trim() != "")
-        {
-            if (Filtro == "ReparacionId" && int.TryParse(ValorFiltro, out int id))
-            {
-                ListaReparaciones = await reparacionServices.Listar(r => r.Id == id);
-            }
-            else if (Filtro == "ClienteNombre")
-            {
-                ListaReparaciones = await reparacionServices.Listar(r => r.ClienteNombre.ToLower().Contains(ValorFiltro.ToLower()));
-            }
-            else if (Filtro == "Estado")
-            {
-                ListaReparaciones = await reparacionServices.Listar(r => r.Estado.ToLower().Contains(ValorFiltro.ToLower()));
-            }
-            else if (Filtro == "DescripcionEquipo")
-            {
-                ListaReparaciones = await reparacionServices.Listar(r => r.DescripcionEquipo.ToLower().Contains(ValorFiltro.ToLower()));
-            }
-        }
-        else
-        {
-            ListaReparaciones = await reparacionServices.Listar(r => r.Id > 0);
-        }
-    }
+	private async Task Buscar()
+	{
+		if (ValorFiltro.Trim() != "")
+		{
+			if (Filtro == "ReparacionId" && int.TryParse(ValorFiltro, out int id))
+			{
+				ListaReparaciones = await reparacionServices.Listar(r => r.Id == id);
+			}
+			else if (Filtro == "ClienteNombre")
+			{
+				ListaReparaciones = await reparacionServices.Listar(r => r.ClienteNombre.ToLower().Contains(ValorFiltro.ToLower()));
+			}
+			else if (Filtro == "Estado")
+			{
+				ListaReparaciones = await reparacionServices.Listar(r => r.Estado.ToLower().Contains(ValorFiltro.ToLower()));
+			}
+			else if (Filtro == "DescripcionEquipo")
+			{
+				ListaReparaciones = await reparacionServices.Listar(r => r.DescripcionEquipo.ToLower().Contains(ValorFiltro.ToLower()));
+			}
+		}
+		else
+		{
+			ListaReparaciones = await reparacionServices.Listar(r => r.Id > 0);
+		}
+	}
 
-    private async Task Restablecer()
-    {
-        ListaReparaciones = await reparacionServices.Listar(r => r.Id > 0);
-        Filtro = string.Empty;
-        ValorFiltro = string.Empty;
-    }
+	private async Task Restablecer()
+	{
+		ListaReparaciones = await reparacionServices.Listar(r => r.Id > 0);
+		Filtro = string.Empty;
+		ValorFiltro = string.Empty;
+	}
 
-    private string GetEstadoBadgeClass(string estado)
-    {
-        return estado switch
-        {
-            "Pendiente" => "bg-warning text-dark",
-            "En Proceso" => "bg-primary",
-            "Completada" => "bg-success",
-            "Entregada" => "bg-secondary",
-            _ => "bg-light text-dark"
-        };
-    }
+	private string GetEstadoBadgeClass(string estado)
+	{
+		return estado switch
+		{
+			"Pendiente" => "bg-warning text-dark",
+			"En Proceso" => "bg-primary",
+			"Completada" => "bg-success",
+			"Entregada" => "bg-secondary",
+			_ => "bg-light text-dark"
+		};
+	}
 
-    private string GetPrioridadBadgeClass(string prioridad)
-    {
-        return prioridad switch
-        {
-            "Baja" => "bg-success",
-            "Media" => "bg-warning text-dark",
-            "Alta" => "bg-danger",
-            "Urgente" => "bg-dark",
-            _ => "bg-light text-dark"
-        };
-    }
+	private string GetPrioridadBadgeClass(string prioridad)
+	{
+		return prioridad switch
+		{
+			"Baja" => "bg-success",
+			"Media" => "bg-warning text-dark",
+			"Alta" => "bg-danger",
+			"Urgente" => "bg-dark",
+			_ => "bg-light text-dark"
+		};
+	}
 }
