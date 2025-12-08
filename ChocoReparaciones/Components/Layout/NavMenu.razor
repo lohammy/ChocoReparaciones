@@ -8,15 +8,16 @@
         @contextUser
     </div>
     <ul class="nav-link">
-        <li><a href="/" class="@GetActive("/", true)">Home</a></li>
-        <li><a href="/ChocoReparaciones/Dashboard" class="@GetActive("/ChocoReparaciones/Dashboard")">Dashboard</a></li>
-        <li><a href="/ChocoReparaciones/Reparaciones" class="@GetActive("/ChocoReparaciones/Reparacion")">Reparación</a></li>
-
+       
         <AuthorizeView Roles="Admin">
             <Authorized>
+                <li><a href="/ChocoReparaciones/Usuarios" class="@GetActive("/ChocoReparaciones/Usuarios")">Usuario</a></li>
                 <li><a href="/ChocoReparaciones/NuevoProducto/crear" class="@GetActive("/ChocoReparaciones/NuevoProducto")">Nuevo Producto</a></li>
             </Authorized>
-        </AuthorizeView>
+		</AuthorizeView>
+        	@* <li><a href="/" class="@GetActive("/", true)">Home</a></li> *@
+ 	        <li><a href="/ChocoReparaciones/Reparaciones" class="@GetActive("/ChocoReparaciones/Reparacion")">Reparación</a></li>
+
         <AuthorizeView Roles="Admin, Tecnico">
             <Authorized>
                 <li><a href="/ChocoReparaciones/Inventario" class="@GetActive("/ChocoReparaciones/Inventario")">Inventario</a></li>
